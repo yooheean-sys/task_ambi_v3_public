@@ -38,3 +38,5 @@ node_modules/
 bin/
 .hermes-runtime/
 .worktrees/
+kanban*_runs/
+__pycache__/
