@@ -1,0 +1,23 @@
+
+### ドキュメントサイト（MkDocs）
+
+README・設計文書（`docs/{{DESIGN_DIR}}` の md・csv・mermaid）・API リファレンス（docstring）・REST API（OpenAPI）を 1 つのサイトにまとめ、1 枚の PDF にも出力できる。設定は [mkdocs.yml](mkdocs.yml)、依存は [pyproject.toml](pyproject.toml) の `docs` グループ。
+
+```bash
+uv sync --group docs                       # 初回だけ（ドキュメント系の依存）
+uv run --group docs mkdocs serve           # 執筆用。http://127.0.0.1:{{PORT}}/
+uv run --group docs mkdocs build --strict  # 静的サイト → site/
+```
+
+1 枚の PDF（`site/{{PDF_OUTPUT}}`）に出すときは、`ENABLE_PDF_EXPORT=true` を付けてビルドする（`=1` は設定エラーになる）。
+
+```bash
+uv run --group docs playwright install chromium   # PDF 化に使うブラウザ（初回だけ）
+ENABLE_PDF_EXPORT=true uv run --group docs mkdocs build --strict
+```
+
+PDF には Node.js の mermaid-cli（`mmdc`。図を SVG に変換する）と、日本語の TrueType フォント（`fonts-ipafont-gothic`）も要る。Noto Sans CJK だと、PDF 内の一部の漢字が部首の文字として記録されて検索・コピーが壊れるため、PDF 用のスタイルシート（[docs/css/pdf.css](docs/css/pdf.css)）は IPA ゴシックを優先する。
+
+- REST API のページは、ビルドのたびに [hooks/gen_openapi.py](hooks/gen_openapi.py) が [scripts/dump_openapi.py](scripts/dump_openapi.py) を別プロセスで呼び、`docs/openapi/openapi.json` をダンプして描く。アプリを組み立てられない環境では `SKIP_OPENAPI_DUMP=1` を付けると、既にある `openapi.json` をそのまま使う。
+- API リファレンスと、設計文書の図（`.mmd`）・表（`.csv`）を包むページは、[scripts/gen_doc_pages.py](scripts/gen_doc_pages.py) がビルド時に生成する（リポジトリにはファイルを足さない）。
+- サイトに載せない文書やコードへのリンクは、リンク切れとして情報扱いにする（`--strict` で止めない）。

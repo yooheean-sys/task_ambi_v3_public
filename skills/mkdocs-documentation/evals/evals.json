@@ -1,0 +1,26 @@
+{
+  "skill_name": "mkdocs-documentation",
+  "evals": [
+    {
+      "id": 1,
+      "name": "full-site-and-pdf",
+      "prompt": "このリポジトリ（FastAPI のモジュラーモノリス。packages/features/*/src と apps/api/src、アプリは api:create_app）を MkDocs でドキュメント化したい。README と docs/design の md・csv・mermaid、docstring の API リファレンス、REST API ドキュメントの 5 つを 1 つのサイトで見られて、1 枚の PDF にも出せるようにして。手順書は社内のものがあるけど、動けばいい。",
+      "expected_output": "mkdocs.yml・hooks・scripts・docs/index.md・docs/openapi/index.md・docs/css が置かれ、docs 依存が pyproject.toml に追加される。mkdocs build --strict が HTML と ENABLE_PDF_EXPORT=true の両方で通り、site/pdf/site.pdf にしおりと 5 種の文字列がある。verify_site.py・check_mermaid.py・check_pdf.py の結果が報告される",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "docstring-openapi-gaps-only",
+      "prompt": "API リファレンスと REST API ドキュメントを MkDocs で自動生成する予定なので、その前に docstring と FastAPI の記述が足りていない箇所を洗い出して埋めておいて。Args や Returns が無い関数、Pydantic の項目説明が無いもの、summary が英語の自動生成になっている操作が結構あると思う。サイトの構築はまだいい。",
+      "expected_output": "docstring_audit.py と openapi_tools.py audit で欠落が数えられ、doctool の spec で Args/Returns/属性 docstring が埋まり、HTTP 型だけに use_attribute_docstrings=True、router に summary・response_description・Path(description) が付く。応答コードは増えない。棚卸しの再実行で欠落 0、lint とテストが緑",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "pdf-broken-investigation",
+      "prompt": "mkdocs-exporter で作った一括 PDF がおかしい。しおりが無いし、PDF の中で日本語を検索しても引っかからない単語がある（「実行」とか）。あと CSV の表で <PROFILE> みたいなところが消えてる。mkdocs.yml はリポジトリのルートにある。直して。",
+      "expected_output": "原因（exporter はしおりを作らない／Noto Sans CJK の Type3 埋め込みで漢字が康熙部首として記録される／table-reader が < をエスケープしない）を特定し、pdf_outline・pdf.css（IPA ゴシック）・escape_placeholders の hook を入れ、check_pdf.py でしおりあり・部首化け 0、verify_site.py で占位子の表示を確かめる",
+      "files": []
+    }
+  ]
+}

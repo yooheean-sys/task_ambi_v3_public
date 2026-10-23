@@ -1,0 +1,107 @@
+# {{SITE_NAME}}（MkDocs ＋ Material）。scaffold.py が mkdocs-documentation スキルの雛形から生成した。
+# 執筆: uv run --group docs mkdocs serve（http://127.0.0.1:{{PORT}}/）
+# 一括 PDF: ENABLE_PDF_EXPORT=true uv run --group docs mkdocs build --strict → site/{{PDF_OUTPUT}}
+#   ⚠ `ENABLE_PDF_EXPORT=1` は使えない。`!ENV` は値を YAML として読むので 1 は整数になり、
+#   exporter の `enabled`（真偽値だけを受ける）が設定エラーで止まる。`true` を渡す。
+site_name: {{SITE_NAME}}
+site_url: "http://127.0.0.1:{{PORT}}/"   # exporter が PDF 内のリンク先の組み立てに使う（serve と同じ所在）
+dev_addr: "127.0.0.1:{{PORT}}"           # 8000 番はアプリが使うことが多いので避ける
+docs_dir: docs
+
+# サイトに載せない docs 配下のファイル（gitignore と同じ書式）。
+exclude_docs: |
+{{EXCLUDE_DOCS}}
+
+# README・設計文書はサイト外（コード・非公開メモ）へのリンクを持ちうる。直すと GitHub・Obsidian
+# での表示が崩れるので、リンク切れだけは情報扱いにする（プラグインや docstring の警告は --strict のまま止める）。
+validation:
+  links:
+    not_found: info
+    anchors: info
+
+theme:
+  name: material
+  language: ja
+  features:
+    - navigation.indexes             # パッケージの index ページを節の先頭に置く
+
+# 雛形の hook とスクリプトが読む設定（ここの 1 か所に寄せる）。
+extra:
+  docs_build:
+    openapi_app: "{{OPENAPI_APP}}"   # module:attr。アプリ工場（呼ぶ）か FastAPI インスタンス。空ならダンプしない
+    openapi_output: docs/openapi/openapi.json
+    design_dir: "{{DESIGN_DIR}}"     # docs_dir からの相対。空なら設計文書のページを作らない
+    exclude_modules: [{{EXCLUDE_MODULES}}]   # API リファレンスから外すモジュール名（画面など）
+    escape_all_prefixes: [{{ESCAPE_ALL_PREFIXES}}]   # 生 HTML を使わないページ（<br> 以外の <名前> をすべてエスケープ）
+    escape_non_html_prefixes: ["openapi/"]   # プラグインが生 HTML を差し込むページ（HTML 要素名でない <名前> だけ）
+    pdf_output: "{{PDF_OUTPUT}}"     # exporter の aggregator.output と同じ値にする
+
+plugins:
+  - search:
+      lang: [ja]                     # ja 単独（en を併記すると検索が動かない報告がある）
+  - gen-files:                       # API リファレンスと設計図・表のページをビルド時に生成する
+      scripts:
+        - scripts/gen_doc_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - table-reader                     # CSV の表展開
+  # README と .mmd の取り込み。`base_path` という設定は無い（snippets の設定）。パスは取り込む側のファイルからの相対
+  - include-markdown
+  - neoteroi.mkdocsoad:              # OpenAPI の Markdown 化
+      use_pymdownx: true
+  - mkdocstrings:                    # docstring の動的解析
+      handlers:
+        python:
+          paths:                     # 各モジュールの src（モジュールの 1 つ上）を列挙する
+{{SRC_PATHS}}
+          options:
+            docstring_style: google
+            docstring_section_style: list
+            docstring_options: { ignore_init_summary: true }
+            merge_init_into_class: true
+            show_source: true
+            show_signature_annotations: true
+            separate_signature: true
+            signature_crossrefs: true
+            members_order: source
+            filters: ["!^_"]
+            show_root_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+  - mermaid-to-svg:                  # PDF 用の Mermaid SVG 事前変換（include-markdown より後に置く）
+      enabled_if_env: ENABLE_PDF_EXPORT
+      puppeteer_config: puppeteer-config.json
+      error_on_fail: true
+      mermaid_config:
+        htmlLabels: false
+  - exporter:                        # PDF 出力（最後に置く）
+      formats:
+        pdf:
+          enabled: !ENV [ENABLE_PDF_EXPORT, false]
+          stylesheets:               # PDF だけに効く（日本語フォント・ソースの折りたたみを外す）
+            - docs/css/pdf.css
+          aggregator:
+            enabled: true
+            output: {{PDF_OUTPUT}}
+
+hooks:
+  - hooks/gen_openapi.py             # build/serve の前に openapi.json を別プロセスでダンプする
+  - hooks/escape_placeholders.py     # `<key>` などの占位子が HTML タグとして消えないようにする
+  - hooks/exclude_nav_files.py       # literate-nav のナビ定義（SUMMARY.md）をページにしない
+  - hooks/pdf_outline.py             # 一括 PDF にナビどおりのしおりを付ける（exporter は付けない）
+
+markdown_extensions:
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra_css:
+  - css/mkdocsoad.css                # neoteroi 公式 CSS（インストールした版のリリース配布物）
+
+nav:
+{{NAV}}

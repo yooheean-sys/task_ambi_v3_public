@@ -1,0 +1,18 @@
+/*
+ * 一括 PDF（mkdocs-exporter）だけに効くスタイル。HTML のサイトには読み込まない。
+ *
+ * - 日本語は IPA ゴシック（TrueType。apt の fonts-ipafont-gothic）で出す。指定しないと Chromium が
+ *   中国語フォント（WenQuanYi Zen Hei）を選び、漢字が中国語の字形になる。Noto Sans CJK JP（CFF）は
+ *   Chromium が Type3 で埋め込み、「行」「入」などが康熙部首の文字として記録されて PDF 内の検索・
+ *   コピーが壊れる（2026-10-07 実測）ので予備に回す。英数字は Liberation Sans／DejaVu Sans Mono。
+ * - mkdocstrings のソースコードの折りたたみ（show_source）を載せない: PDF では閉じたまま中身が
+ *   見えないうえ、長いソースの表を Paged.js がページに分割できず「Layout repeated」で止まる。
+ */
+:root {
+  --md-text-font: "Liberation Sans", "IPAGothic", "Noto Sans CJK JP";
+  --md-code-font: "DejaVu Sans Mono", "IPAGothic", "Noto Sans Mono CJK JP";
+}
+
+details.mkdocstrings-source {
+  display: none;
+}

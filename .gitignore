@@ -1,0 +1,40 @@
+# task-ambi-harness 配布除外リスト
+# 準拠: hermes profile distribution の公式除外リスト
+#   （hermes_cli/profiles.py DEFAULT_EXPORT_EXCLUDE_ROOT +
+#     profile_distribution.py USER_OWNED_EXCLUDE）
+
+# --- 秘匿系（導入先ごとに用意する。配布対象外） ---
+auth.json
+.env
+
+# --- ランタイム状態・データベース ---
+state.db*
+response_store.db*
+logs/
+sessions/
+memories/
+workspace/
+plans/
+home/
+backups/
+cache/
+*_cache/
+local/
+
+# --- プロセス・ゲートウェイ状態 ---
+gateway.pid
+gateway.pid.lock
+gateway_state.json
+processes.json
+
+# --- cron 配布所有範囲は jobs.json のみ（他はスケジューラ状態） ---
+cron/*
+!cron/jobs.json
+
+# --- インフラ・導入成果物 ---
+hermes-agent/
+profiles/
+node_modules/
+bin/
+.hermes-runtime/
+.worktrees/
