@@ -568,9 +568,16 @@ step7_verify() {
     fail=1
   fi
   # 6) skills のプレースホルダが残っていないか（置換漏れチェック）
-  local leftover
-  leftover="$(grep -rl --include='*.md' --include='*.yaml' --include='*.json' \
-      '\${\(HERMES_\|USER_\|VAULT_\|KANBAN_\|ORG_\|REPO_\|PROJECT_\|DASHBOARD_\|GITLAB_\|LOCAL_\)' \
+  #    検出対象は sed 置換式（[$][{]NAME[}]・build_sed_args と同じ）の通り
+  #    「閉じた裸プレースホルダ」のみとする。${HERMES_HOME:-~/.hermes} 形式の
+  #    シェル既定値展開は sed の置換対象外であり、正本の .md/.yaml/.json に
+  #    正当に存在するため除外する（P6 裁定 2026-10-24・prefix-only の旧 BRE は
+  #    これを誤検出していた。step3 detect_unknown_placeholders と同じ
+  #    「接頭辞＋閉じトークン」の形に揃える）。
+  local leftover prefixes_re
+  prefixes_re="$(IFS='|'; printf '%s' "${PLACEHOLDER_PREFIXES[*]}")"
+  leftover="$(grep -rlE --include='*.md' --include='*.yaml' --include='*.json' \
+      "\\\$[{](${prefixes_re})[A-Za-z0-9_]+[}]" \
       "$DEST/skills" 2>/dev/null | head -3 || true)"
   if [[ -n "$leftover" ]]; then
     warn 'skills 内に未置換のハーネスプレースホルダが残っています（例）:'
