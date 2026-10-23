@@ -2,7 +2,7 @@
 # ============================================================================
 # install_local.sh — task_ambi_v3_public（task-ambi-harness）ローカル導入スクリプト
 #
-# 出典: task_ambi_v3/docs/harness_migration_plan.md §5 P4（install_local.sh 実装）
+# 出典: ${REPO_NAME}/docs/harness_migration_plan.md §5 P4（install_local.sh 実装）
 # 上位層裁定（親カード t_5b7e0e6c で確定した内容を継承・原文どおり）:
 #  ① 実行形態は「hermes profile 機能による導入」を前提とする
 #  ② ソースは task_ambi_v3_public リポジトリ内のファイルのみを対象とする
@@ -444,7 +444,7 @@ step4_install_files() {
     install_one_file "$SRC_ROOT/$f" "$DEST/$f"
   done
   install_tree "$SRC_ROOT/agent-hooks" "$DEST/agent-hooks"
-  # criteria は kanban_runs 直下（実機の criteria 配置先）
+  # criteria は ${KANBAN_RUNS_DIR} 直下（実機の criteria 配置先）
   install_tree "$SRC_ROOT/criteria" "$KANBAN_RUNS_DEST" "criteria/"
   info '[step4] 完了'
 }

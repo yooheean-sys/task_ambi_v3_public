@@ -1,0 +1,29 @@
+# 機密スキャン自動化（P6 / F14）
+#
+# 根拠: 正本リポジトリ docs/harness_migration_plan.md
+#   - L167: 機密スキャン（置換対象語・実パス・組織名・社名が0件）を pre-commit で自動化
+#   - L179: 検査語リストは人名・組織名・社名も含める（正本 F4/F10 語群を単一ソースとする）
+#   - L185: 検査語リストに .env の値群も含める（雛形共有値は除外）
+#
+# 設計:
+#   - 語群は正本 ${REPO_NAME}/scripts/harness_replacements.py（F4）と
+#     make_harness_public.py（F10）から実行時に読む。機密語リスト自体は
+#     公開リポジトリに含めない（計画 §5 D3）。
+#   - 正本が無い環境では .env 実値 + 内蔵汎用正規表現の劣化モードで走査する。
+#   - .env のステージ/コミットは常に失敗させる（L185 の二重防護）。
+#   - 検出値そのものは出力しない（.env 値は KEY 名のみ報告）。
+#
+# 使い方:
+#   pip install pre-commit && pre-commit install
+#   全追跡ファイルの最終検査: pre-commit run secret-scan --all-files
+#   （同等の直接実行: python3 agent-hooks/secret_scan.py --all）
+repos:
+  - repo: local
+    hooks:
+      - id: secret-scan
+        name: secret-scan (F10 相当・機密語 0 件検査)
+        entry: python3 agent-hooks/secret_scan.py
+        language: system
+        pass_filenames: true
+        require_serial: true
+        stages: [pre-commit]
