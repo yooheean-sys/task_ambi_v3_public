@@ -39,7 +39,7 @@ kanban のメカニクス（create / link / watch / archive・依存の向き・
    - 対象リポジトリがある → `git -C <repo> remote get-url origin` の GitLab グループで紐づける。実績マッピング: ${REPO_NAME}（`~/project/task_ambi/${REPO_NAME}`、origin `${GITLAB_URL_ORG}/${REPO_NAME}.0.git`）→ g01_${ORG_NAME}
    - 対象が `~/.hermes` や `~/${KANBAN_RUNS_DIR}` 配下（組織自体の SOUL・criteria 改訂系）→ プロジェクトに紐づかない扱いにする。この系の改訂適用は人間承認条項（harness 等の SOUL）に従う
    - 曖昧なら選択肢+推奨を付けて人間に尋ねる
-2. `hermes profile list`（または `hermes kanban assignees`）で専任 `project_lead_<正式名>` が実在するか確認する。**profile 名は小文字化される**（実在例: `project_lead_p01_aasystem`）が、assignee に指定する名前はデスクトッププロジェクト正式名のまま（`project_lead_${PROJECT_P01_NAME}`）でよい
+2. `hermes profile list`（または `hermes kanban assignees`）で専任 `project_lead_<正式名>` が実在するか確認する。**profile 名は小文字化される**（実在例: `project_lead_${PROJECT_P01_NAME}`）が、assignee に指定する名前はデスクトッププロジェクト正式名のまま（`project_lead_${PROJECT_P01_NAME}`）でよい
 3. 実在する → **プロジェクトモード**: ルート assignee = `project_lead_<正式名>`。planner を飛ばし、project_lead から下の3階層（project_lead → 第3層3役 → 実行15役）で運用する。planner の判定・振り分け機能が働かないため、ルート本文に対象プロジェクト・workspace・参照先（プロジェクトの .hermes.md とディレクトリ）を必ず明記する。契約上の位置関係に留意点がある場合（例: 対象リポジトリが SOUL 契約ルートの外）は、本文に人間の裁定（判断内容・承認日付）を1文明記する — 上位層はそれを根拠に着手し、疑義が残る点だけ needs_input に回す（実測: 第二拠点 ${REPO_NAME} では needs_input 不発火で着手・本文明記が根拠となった）
 4. 実在しない / プロジェクト不特定 → **フル4階層モード**: ルート assignee = planner（専任の無いプロジェクトへのフォールバック配線は planner SOUL が担う）
 

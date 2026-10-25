@@ -67,7 +67,7 @@ LINE hermes_md_contract required=yes except=none
 ANCHOR>>- 起票・分解の前にプロジェクトルートの `.hermes.md`
 TEXT>>- 起票・分解の前にプロジェクトルートの `.hermes.md`（ディレクトリ契約）を読む。あなたはその内容を子タスクの本文に反映する役割を持つ（契約自体を書き換えない）。契約の記載と `ls` の実測が食い違うときは実測を優先し、食い違いを kanban_comment に記録する
 
-LINE workspace_kanban_create required=yes except=project_lead_p01_aasystem,project_lead_xxx_others_pj
+LINE workspace_kanban_create required=yes except=project_lead_${PROJECT_P01_NAME},project_lead_xxx_others_pj
 ANCHOR>>- 子タスクの起票（kanban_create）では workspace_kind='dir'
 TEXT>>- 子タスクの起票（kanban_create）では workspace_kind='dir' と workspace_path=<実在ディレクトリの接頭辞なし絶対パス> を必ず指定する（`dir:` 接頭辞を付けない。scratch 起票は誤起票）。workspace をプロジェクトルート配下に置くと、子ワーカーの cwd がルート配下になり `.hermes.md` が自動注入される
 

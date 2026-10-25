@@ -66,7 +66,7 @@ python3 "$SCRIPT" capture --from project_lead_xxx_others_pj   # 正本の再採�
 
 ## Pitfalls
 
-- **プロファイルディレクトリ名は小文字化される**（例: project_lead_p01_aasystem）。`--only` / `except=` はディレクトリ名で指定する（assignee 名の ${PROJECT_P01_NAME} ではない）
+- **プロファイルディレクトリ名は小文字化される**（例: project_lead_${PROJECT_P01_NAME}）。`--only` / `except=` はディレクトリ名で指定する（assignee 名の ${PROJECT_P01_NAME} ではない）
 - `## あなたは誰か` が 0 個または 2 個以上あるファイルは**構造エラーとして一切書き換えない**。人間に報告する
 - 複製は実体コピーなので、片方だけ直した修正は他に伝わらない。必ず capture → sync の経路で全複製へ反映する
 - 共通節を1枚だけ手で直して capture せずに sync すると、その修正は正本で上書きされて消える。改訂は必ず「1枚改訂 → capture → sync」の順で行う

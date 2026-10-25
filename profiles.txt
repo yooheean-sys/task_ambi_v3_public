@@ -11,10 +11,10 @@ maintenance_procedures
 planner
 presenter
 programmer
-project_lead_g01_${ORG_NAME}
+project_lead_${PROJECT_G01_NAME}
 project_lead_${PROJECT_H01_NAME}
 project_lead_${PROJECT_H02_NAME}
-project_lead_p01_aasystem
+project_lead_${PROJECT_P01_NAME}
 project_lead_${PROJECT_P02_NAME}
 project_lead_xxx_others_pj
 public_relation

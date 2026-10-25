@@ -44,67 +44,53 @@ README.md           本ファイル
 ## install_local.sh によるローカル導入
 
 `hermes profile install` の代わりに、リポジトリ同梱の `install_local.sh` で一括導入する方法。
-`.env`（`HARNESS_*` 変数）を読み込み、リポジトリ内の `${...}` プレースホルダを導入先の実値へ
-逆方向置換して `HARNESS_HOME` 配下へ配置し、25役のプロファイルを
-`hermes profile create --clone-from default` で生成する。
+`.env`（`HARNESS_*` キー）を読み込み、リポジトリ内の `${...}` プレースホルダを導入先の
+実値へ逆方向置換して配置する（skills・SOUL・criteria・cron・agent-hooks を含む）。
 
 ```
-bash install_local.sh --dry-run              # 書き込まず配置先と置換内容を確認（値はマスク表示）
-bash install_local.sh --apply                # 実配置（profile 作成を含む・確認プロンプトあり）
-bash install_local.sh --apply --skip-confirm # 確認プロンプトを省略（自動実行用）
+bash install_local.sh --dry-run              # 書き込まず配置先と置換内容を確認
+bash install_local.sh --apply                # 実配置（profile 作成を含む）
+bash install_local.sh --apply --skip-confirm # 確認プロンプトを省略（自動化用）
 bash install_local.sh --replace-test --env FILE < input.txt > output.txt
-                                             # 逆方向置換の単体テスト用（配置なし・stdin を置換して stdout へ）
+                             # 逆方向置換の単体テスト（配置なし・stdin を置換して stdout へ）
 ```
 
-- `HARNESS_HOME` が未設定・`REPLACE_ME`・空値のときは欠落キー一覧を表示して終了する
-  （既定パスへの暗黙フォールバックはしない）。
-- 置換テーブルに無い未知の `${...}` プレースホルダを検出した場合は導入を中止する。
-- 既存のプロファイルがある場合は SOUL のみ差し替える。`cron/jobs.json` は既存時に `.orig` へ退避する。
-- criteria は `.env` の `HARNESS_KANBAN_RUNS_DIR` 直下へ配置する。
-- 参照する `HARNESS_*` キーの全容は `install_local.sh` 冒頭のコメントを参照
-  （下記の env_requires 12 変数に加え、`HARNESS_USER_NAME`・`HARNESS_ORG_NAME` など
-  置換テーブル分のキーを使用する。`PROJECT_*_NAME` / `ORG_NAME` / `REPO_NAME` は
-  `HARNESS_PROJECT_NAME_MAP` の「一般名=実名」ペアからも供給でき、直値キーが優先される）。
+- `.env` が無い場合は `.env.EXAMPLE` をコピーして記入を案内して終了する。
+- 直値キー（`HARNESS_PROJECT_*_NAME` 等）が優先され、`HARNESS_PROJECT_NAME_MAP`
+  （一般名=実名ペア）は欠落キーの供給に使われる。
+- criteria は `${KANBAN_RUNS_DIR}`（`HARNESS_KANBAN_RUNS_DIR`）直下へ配置する。
 
 ### プロファイルの更新方針（重要）
 
-`install_local.sh` が生成・更新したプロファイルは、**`hermes profile update` の対象外**である。
-配布リポジトリ側の変更を導入先へ反映するには、`hermes profile update` を使わず
-**本スクリプトを再実行する**（2026-10-24 人間裁定 1。根拠: ${REPO_NAME} リポジトリ
-`harness_policy.md` §8 D1/D2・§9【裁定：人間】公開化・push）。
+`install_local.sh` で作成したプロファイルは `hermes profile update` の対象外である
+（distribution 管理外のため）。更新は本リポジトリの `install_local.sh --apply` の再実行で
+行う（2026-10-24 人間裁定 1・根拠: ${REPO_NAME} リポジトリ）。
 
 ## env_requires 変数一覧
 
-`hermes profile install` は `distribution.yaml` の `env_requires`（12 変数）に列挙した
-変数を要求する。`.env.EXAMPLE` と同一の列挙であり、意味は `.env.EXAMPLE` のコメントに準じる。
+`distribution.yaml` の `env_requires` に列挙した 12 変数（`.env.EXAMPLE` と同一）。
 
 | 変数 | 意味 |
 |---|---|
-| `HARNESS_HOME` | 導入先の Hermes ホーム（`~/.hermes` 相当）。ハーネス内の `/home/user/.hermes` 形式プレースホルダをこの値で復元する |
-| `HARNESS_USER_HOME` | 導入先のユーザホーム（例: `/home/user`）。ホーム配下パスの共通接頭辞 |
-| `HARNESS_VAULT_ROOT` | Obsidian vault のルートパス。vault 参照系スキル・cron ジョブ内の vault パス復元用 |
-| `HARNESS_KANBAN_RUNS_DIR` | ワーク実行ルート（kanban ワーカの実行ディレクトリ） |
-| `HARNESS_PROJECT_ROOT` | `${REPO_NAME}` ローカルリポジトリのパス。プロジェクト内の scripts・criteria・docs 参照の基点 |
-| `HARNESS_LANGFUSE_URL` | Langfuse の URL（self-host 環境のホスト名または IP+ポート） |
-| `HARNESS_LANGFUSE_PUBLIC_KEY` | Langfuse の public key（プロジェクト設定で発行） |
-| `HARNESS_LANGFUSE_SECRET_KEY` | Langfuse の secret key（秘匿値のため取り扱い注意） |
-| `HARNESS_PROJECT_NAME_MAP` | プロジェクト一般名と実名の対応（criteria 一般化の復元用）。カンマ区切りの「一般名=実名」ペア（例: `g01=REPLACE_ME,p01=REPLACE_ME`） |
-| `HARNESS_DASHBOARD_BASIC_AUTH_USERNAME` | ダッシュボード basic auth のユーザ名 |
-| `HARNESS_DASHBOARD_BASIC_AUTH_PASSWORD_HASH` | ダッシュボード basic auth の scrypt パスワードハッシュ（秘匿値のため取り扱い注意） |
-| `HARNESS_DASHBOARD_BASIC_AUTH_SECRET` | ダッシュボード basic auth の secret トークン（秘匿値のため取り扱い注意） |
-
-秘匿値に分類されるのは `HARNESS_LANGFUSE_SECRET_KEY`・`HARNESS_DASHBOARD_BASIC_AUTH_PASSWORD_HASH`・
-`HARNESS_DASHBOARD_BASIC_AUTH_SECRET` の 3 変数。実値は `.env`（配布対象外・コミット禁止）にのみ置く。
+| `HARNESS_HOME` | 導入先の Hermes ホーム（`~/.hermes` 相当） |
+| `HARNESS_USER_HOME` | ユーザホーム（例: `/home/user`） |
+| `HARNESS_VAULT_ROOT` | Obsidian vault のルートパス |
+| `HARNESS_KANBAN_RUNS_DIR` | kanbanRuns の配置先（criteria もここへ置く） |
+| `HARNESS_PROJECT_ROOT` | task_ambi プロジェクトのルートパス |
+| `HARNESS_LANGFUSE_URL` | Langfuse エンドポイント URL |
+| `HARNESS_LANGFUSE_PUBLIC_KEY` | Langfuse の公開鍵 |
+| `HARNESS_LANGFUSE_SECRET_KEY` | Langfuse の秘密鍵 |
+| `HARNESS_USER_NAME` | 導入先ユーザ名 |
+| `HARNESS_USER_NAME_LOWER` | 同上の小文字形（パス用） |
+| `HARNESS_ORG_ROOT` | 組織ルートパス（`/home/user/<org>` 等） |
+| `HARNESS_ORG_NAME` | 組織名 |
 
 ## cron の再設定（重要）
 
 - `cron/jobs.json` を配置しても、ジョブは**自動スケジュールされない**（公式仕様）。
-  配布しても導入先で自動的に動き始めることはない。
 - 導入後、`hermes cron list` でジョブを確認し、必要なジョブを `hermes cron enable <job-id>`
   で個別に有効化する（全ジョブを一斉に有効化しないこと）。
 - 有効化後、`hermes cron doctor` でスキル解決・配信ターゲットのエラーを確認する。
-- cron ジョブが `script:` でスクリプトを参照する場合は、参照先スクリプトを
-  `$HERMES_HOME/scripts/` へ**手動でコピー**する。
 
 ## 注意事項
 

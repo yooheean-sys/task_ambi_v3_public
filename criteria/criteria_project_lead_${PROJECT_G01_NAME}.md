@@ -1,16 +1,16 @@
 ---
 version: 1.1
 updated: 2026-10-17
-applies_to: [project_lead_g01_${ORG_NAME}]
+applies_to: [project_lead_${PROJECT_G01_NAME}]
 core: criteria.md
 supersedes: null
 ---
 
-# 裁定基準（役別）— project_lead_g01_${ORG_NAME}
+# 裁定基準（役別）— project_lead_${PROJECT_G01_NAME}
 
 ## 0. 適用と読み込み順序
 
-- 本表は共通コア `criteria.md`（v1.1）に対する **project_lead_g01_${ORG_NAME} 固有の上書き・追加条項**のみを定める。本表に書かれていない点は共通コアに従う
+- 本表は共通コア `criteria.md`（v1.1）に対する **project_lead_${PROJECT_G01_NAME} 固有の上書き・追加条項**のみを定める。本表に書かれていない点は共通コアに従う
 - 共通コアを先に読み、その上に本表を適用する。**競合時は本表を優先**する。ただし本表は共通コアを緩める方向に書かない（緩める改訂が必要な場合は共通コア側の改訂として人間に提案する）
 - 適用対象は本役の分解・検収の全行為。配下に起票した子タスク（第3層3役）とその配下の実行役は、共通コアの実行役規定とそれぞれの SOUL に従い、本表を直接適用しない
 - 本表は **g01_${ORG_NAME} 専用**である。他プロジェクトのタスクが割り当てられた場合は誤配として needs_input で人間に渡し、本表を適用して判断しない
@@ -56,7 +56,7 @@ supersedes: null
 
 ## 4. 改訂
 
-- 本表の改訂候補は kanban_comment に「改訂候補: criteria_project_lead_g01_${ORG_NAME}.md …」で始める1文を記録し、人間が本ファイルを改訂する
+- 本表の改訂候補は kanban_comment に「改訂候補: criteria_project_lead_${PROJECT_G01_NAME}.md …」で始める1文を記録し、人間が本ファイルを改訂する
 - **project_lead 共通部分（§0〜§1・§3 の共通部分）の改訂は、全複製の criteria_project_lead_*.md への同時適用が必要**。改訂候補にはその旨を明記する
 - 共通コア側の改訂候補は、共通コア §6 のとおり criteria.md 宛に記録する
 
