@@ -38,6 +38,8 @@ speckit-tasks
 speckit-taskstoissues
 ${PROJECT_NAME}/${PROJECT_NAME}_boot
 ${PROJECT_NAME}/${PROJECT_NAME}_harness_distribution
+${PROJECT_NAME}/${PROJECT_NAME}_harness_export
+${PROJECT_NAME}/${PROJECT_NAME}_harness_import
 ${PROJECT_NAME}/${PROJECT_NAME}_kanban-agent-org
 ${PROJECT_NAME}/${PROJECT_NAME}_persona_migration
 ${PROJECT_NAME}/${PROJECT_NAME}_project
