@@ -24,7 +24,7 @@
 #  ② .env 読み込み（無ければ .env.EXAMPLE をコピーして記入を案内して終了）
 #  ③ 逆方向置換の準備（HARNESS_* → プレースホルダ値。欠落キーは一覧表示して失敗）
 #  ④ ファイル配置（内容＋ディレクトリ名の両方を置換）
-#     skills は skills.txt の登録分のみ。未登録の既存スキルは削除しない。
+#     skills は skills.txt の登録分のみ。skills_ignore.txt 登録分は移行対象外。未登録の既存スキルは削除しない。
 #  ⑤ 25役生成（hermes profile create --clone-from default ＋ souls/ から SOUL 差し替え）
 #  ⑥ cron jobs.json 配置（既存は .orig 退避）＋ cron 有効化手順の表示
 #  ⑦ 導入確認（profile list・配置ファイルの存在確認）
@@ -390,12 +390,12 @@ load_selected_skills() {
   [[ -f "$SRC_ROOT/skill_manifest.py" ]] || die 'skill_manifest.py がありません'
   local selected
   selected="$("$PY_BIN" "$SRC_ROOT/skill_manifest.py" "$SRC_ROOT")" \
-    || die 'skills.txt の検証に失敗しました（配置前に中止）'
+    || die 'skills.txt / skills_ignore.txt の検証に失敗しました（配置前に中止）'
   SKILL_PATHS=()
   if [[ -n "$selected" ]]; then
     mapfile -t SKILL_PATHS <<< "$selected"
   fi
-  info "[skills] skills.txt 登録 ${#SKILL_PATHS[@]} 件（未登録は配置しない）"
+  info "[skills] skills.txt 登録 ${#SKILL_PATHS[@]} 件（skills_ignore.txt と矛盾なし・未登録は配置しない）"
 }
 
 # ②.env 読み込み（無ければ .env.EXAMPLE をコピーして記入を案内して終了）

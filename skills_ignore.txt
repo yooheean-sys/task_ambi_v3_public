@@ -1,0 +1,66 @@
+# 移行対象外スキルの無視リスト（skills.txt と同じ書式・1行1件）
+# Hermes 同梱スキル（~/.hermes/skills/.bundled_manifest 58件のうち配布対象だった分）と、
+# 公式配布のスキルを登録する。導入先環境には同梱分が既にあるため配布しない。
+# - skills.txt と両方に書いたスキルは矛盾として生成・導入前にエラーになる
+# - 存在しないパスも事前宣言として書いてよい（将来の誤登録を防ぐ）
+# - 新たに公式カタログ等で導入したスキルはここへ明示追加する
+
+apple/apple-notes
+apple/apple-reminders
+apple/findmy
+apple/imessage
+autonomous-ai-agents/claude-code
+autonomous-ai-agents/codex
+autonomous-ai-agents/computer-use
+autonomous-ai-agents/hermes-agent
+autonomous-ai-agents/opencode
+creative/architecture-diagram
+creative/ascii-video
+creative/baoyu-infographic
+creative/claude-design
+creative/design-md
+creative/humanizer
+creative/manim-video
+creative/p5js
+creative/popular-web-designs
+creative/songwriting-and-ai-music
+devops/sdlc-review
+email/email-inbox-triage
+email/himalaya
+glab
+media/gif-search
+media/songsee
+media/youtube-content
+note-taking/obsidian
+productivity/airtable
+productivity/box
+productivity/document-to-action-items
+productivity/docx
+productivity/google-workspace
+productivity/maps
+productivity/meeting-action-items
+productivity/notion
+productivity/pdf
+productivity/powerpoint
+productivity/product-price-monitor
+productivity/teams-meeting-pipeline
+productivity/weekly-review-planning
+productivity/xlsx
+research/arxiv
+research/competitor-news-monitor
+research/grounded-citations
+research/llm-wiki
+social-media/xurl
+software-development/codebase-inspection
+software-development/dogfood
+software-development/github
+software-development/hermes-agent-skill-authoring
+software-development/inspecting-hermes-desktop-dom
+software-development/node-inspect-debugger
+software-development/python-debugpy
+software-development/requesting-code-review
+software-development/simplify-code
+software-development/spike
+software-development/systematic-debugging
+software-development/test-driven-development
+web/blocked-page-recovery

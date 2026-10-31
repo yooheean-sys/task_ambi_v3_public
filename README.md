@@ -19,7 +19,8 @@ hooks.json          shell hooks 登録定義の正本
 integration_settings.py  既存設定の部分移行・競合検知・復元
 pyproject.toml      導入ツールの依存定義（Python・PyYAML）
 skills.txt          配布対象スキルの相対パス許可リスト
-skill_manifest.py   許可リストの共通検証処理（Python 標準ライブラリのみ）
+skills_ignore.txt   移行対象外スキルの無視リスト（同梱・公式配布スキル）
+skill_manifest.py   許可リスト・無視リストの共通検証処理（Python 標準ライブラリのみ）
 skills/             skills.txt に登録したスキルと同梱ファイル
 agent-hooks/        mermaid-check 等
 souls/              25役分の SOUL.md（souls/<役名>/SOUL.md・profiles.txt と対応）
@@ -42,6 +43,10 @@ pbi
 ```
 
 - 正本では `harness/skills.txt` を編集する。対応する実体は `harness/skills/` に置く。
+- `skills_ignore.txt` は移行対象外スキルの無視リスト。Hermes 同梱スキルと公式配布の
+  スキル（glab 等）を登録する。導入先環境には同梱分が既にあるため配布・上書きしない。
+  書式は `skills.txt` と同じだが、存在しないパスも事前宣言として書いてよい。
+  `skills.txt` と両方に書いたスキルは矛盾として、生成・導入の書き込み前にエラーになる。
 - 各登録先に `SKILL.md` が必要。同じディレクトリ内の references・scripts・assets も対象。
   カテゴリの説明書など、登録したスキルディレクトリの外にあるファイルは配布しない。
 - 空行と `#` から始まるコメント行は無視する。行の前後の空白は取り除く。
