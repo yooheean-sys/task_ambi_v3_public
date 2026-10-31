@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "pre_tool_call": [
+      {
+        "matcher": "write_file|patch",
+        "command": "python3 ${HERMES_HOME}/agent-hooks/mermaid-check.py gate",
+        "timeout": 120
+      }
+    ],
+    "post_tool_call": [
+      {
+        "matcher": "write_file|patch",
+        "command": "python3 ${HERMES_HOME}/agent-hooks/mermaid-check.py check",
+        "timeout": 120
+      }
+    ],
+    "pre_llm_call": [
+      {
+        "command": "python3 ${HERMES_HOME}/agent-hooks/mermaid-check.py surface",
+        "timeout": 10
+      }
+    ]
+  }
+}

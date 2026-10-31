@@ -1,6 +1,8 @@
 # task-ambi-harness（公開版）
 
-Hermes Agent 用ハーネス（task_ambi 4階層カンバン組織の動作環境一式）の公開配布版です。
+Hermes Agent 用ハーネス（task_ambi 4階層カンバン組織の役割・スキル・MCP・hooks）の公開配布版です。
+`config.yaml` 全体は配布しません。導入先の初期設定済み config の `mcp_servers` と `hooks`
+だけを部分更新し、モデル・認証・プラグインなどの既存設定は維持します。
 実パス・ユーザー名・組織名・IP アドレスなどの環境固有値は、すべて `${...}` 形式の
 プレースホルダ（または一般化トークン `<...>`）に置換済みです。導入時に `.env` へ実値を
 設定すると、導入スクリプトが逆方向置換で実値へ復元します。
@@ -12,8 +14,10 @@ distribution.yaml   配布マニフェスト（name・version・license・env_re
 .env.EXAMPLE        導入先が埋めるべき HARNESS_* 変数の雛形（実値は書かない）
 .gitignore          配布除外リスト（secrets・ランタイム状態）
 SOUL.md             default プロファイルの SOUL
-config.yaml         default の config（hooks・mcp_servers を含む）
-mcp.json            MCP 接続定義
+mcp.json            MCP 接続定義の正本（Serena を含む）
+hooks.json          shell hooks 登録定義の正本
+integration_settings.py  既存設定の部分移行・競合検知・復元
+pyproject.toml      導入ツールの依存定義（Python・PyYAML）
 skills.txt          配布対象スキルの相対パス許可リスト
 skill_manifest.py   許可リストの共通検証処理（Python 標準ライブラリのみ）
 skills/             skills.txt に登録したスキルと同梱ファイル
@@ -52,23 +56,28 @@ pbi
 
 ## 導入手順
 
-1. `.env.EXAMPLE` を `.env` としてコピーし、各 `REPLACE_ME` を導入先環境の実値で埋める。
-   `.env` はリポジトリにコミットしないこと。
-2. 単一プロファイル導入: `hermes profile install <このディレクトリ>`。
-   distribution.yaml の env_requires に列挙した変数が要求される（一覧は後述の
-   「env_requires 変数一覧」）。
-3. 25役の再現: `hermes profile create <役名> --clone --no-alias` で default から生成し、
-   `souls/<役名>/SOUL.md` で SOUL を差し替える（対象一覧は profiles.txt）。
-4. 逆方向置換: 同梱の `install_local.sh` が `.env` の `HARNESS_*` キーを参照し、
-   `${...}` プレースホルダを導入先の実値へ復元する（詳細は後述の
-   「install_local.sh によるローカル導入」）。
-5. hooks の初回承認: `--accept-hooks` 付き chat 実行か TTY 承認で allowlist に記録する。
-6. 検証: `hermes profile list`（25役が揃うこと）・`hermes skills list`
-   （frontmatter 破損がないこと）・`hermes hooks doctor`（mermaid-check が緑であること）。
+1. Hermes 本体を導入し、導入先 default の初期設定を済ませる。既存 `config.yaml` が
+   ない場合は停止する。Langfuse 等のプラグインと認証は導入先で手動設定する。
+2. 本ディレクトリで導入ツール用の仮想環境を準備する。
+
+   ```bash
+   uv venv --python 3.13
+   uv pip install -r pyproject.toml
+   source .venv/bin/activate
+   ```
+
+3. `.env.EXAMPLE` を `.env` としてコピーし、必要な `HARNESS_*` を記入する。
+   `.env` はコミットしない。未使用の項目は `REPLACE_ME` のままでよい。
+4. `bash install_local.sh --dry-run` で対象・競合を確認後、`--apply` で導入する。
+5. 導入先で MCP 依存コマンドと hooks の初回承認を確認する。installer は MCP サーバー・
+   gateway・chat・cron を起動せず、hooks を一括自動承認しない。
+
+`hermes profile install` 単体では、専用データからの部分設定反映や25役の再現は完了しない。
+完全な導入と更新の入口は `install_local.sh` に統一する。
 
 ## install_local.sh によるローカル導入
 
-`hermes profile install` の代わりに、リポジトリ同梱の `install_local.sh` で一括導入する方法。
+リポジトリ同梱の `install_local.sh` で導入・更新する。
 `.env`（`HARNESS_*` キー）を読み込み、リポジトリ内の `${...}` プレースホルダを導入先の
 実値へ逆方向置換して配置する（skills・SOUL・criteria・cron・agent-hooks を含む）。
 
@@ -85,6 +94,22 @@ bash install_local.sh --replace-test --env FILE < input.txt > output.txt
   （一般名=実名ペア）は欠落キーの供給に使われる。
 - criteria は `${KANBAN_RUNS_DIR}`（`HARNESS_KANBAN_RUNS_DIR`）直下へ配置する。
 
+### MCPとhooksの部分移行
+
+- `mcp.json` の `mcpServers` を実行時 config の `mcp_servers` に登録する。
+  `hooks.json` の `hooks` をイベント別に統合する。配布物の `config.yaml` は読み込まない。
+- 無関係な既存 MCP・hooks・モデル・MoA・Gateway・認証・plugins は保持する。
+- default と `profiles.txt` に対応する既存役を事前検証し、競合時は他の配布物の配置前に停止する。
+  対象外のプロファイルには触れない。新規役は更新済み default から作成する。
+- 同一内容は再利用する。同名・異内容の未管理 MCP や、変更済みの管理対象は勝手に上書きしない。
+- 管理情報は各ホームの `local/` に記録する。ハーネスが追加した登録・scripts だけを
+  更新・廃止時の削除対象とし、初回から同じ内容で存在した利用者所有の項目は所有権を奪わない。
+- 設定と scripts の部分移行はバックアップ・ロック・変更検知付きで反映する。
+  途中失敗時はこの処理が変更した範囲を復元する。skills・SOUL・criteria・cron を含む
+  installer 全体のトランザクションではない。
+- 秘密の環境変数参照を実値へ展開して保存しない。CLI の設定値・反映コマンドをログに出さない。
+- 既に旧版で全体移行した環境のモデル・plugins 等を元に戻す処理ではない。
+
 ### プロファイルの更新方針（重要）
 
 `install_local.sh` で作成したプロファイルは `hermes profile update` の対象外である
@@ -93,7 +118,9 @@ bash install_local.sh --replace-test --env FILE < input.txt > output.txt
 
 ## env_requires 変数一覧
 
-`distribution.yaml` の `env_requires` に列挙した 12 変数（`.env.EXAMPLE` と同一）。
+`distribution.yaml` は基本的な環境変数を宣言する。専用 installer は
+`HARNESS_HOME`・`HARNESS_KANBAN_RUNS_DIR` と、選択した配布物で使用する値だけを要求する。
+供給可能なキーの一覧は `.env.EXAMPLE` に記載する。Langfuse・dashboard の認証値は要求しない。
 
 | 変数 | 意味 |
 |---|---|
@@ -102,9 +129,7 @@ bash install_local.sh --replace-test --env FILE < input.txt > output.txt
 | `HARNESS_VAULT_ROOT` | Obsidian vault のルートパス |
 | `HARNESS_KANBAN_RUNS_DIR` | kanbanRuns の配置先（criteria もここへ置く） |
 | `HARNESS_PROJECT_ROOT` | task_ambi プロジェクトのルートパス |
-| `HARNESS_LANGFUSE_URL` | Langfuse エンドポイント URL |
-| `HARNESS_LANGFUSE_PUBLIC_KEY` | Langfuse の公開鍵 |
-| `HARNESS_LANGFUSE_SECRET_KEY` | Langfuse の秘密鍵 |
+| `HARNESS_PROJECT_NAME_MAP` | 一般名と正式名の対応。直値キーでの指定も可能 |
 | `HARNESS_USER_NAME` | 導入先ユーザ名 |
 | `HARNESS_USER_NAME_LOWER` | 同上の小文字形（パス用） |
 | `HARNESS_ORG_ROOT` | 組織ルートパス（`/home/user/<org>` 等） |
@@ -112,15 +137,15 @@ bash install_local.sh --replace-test --env FILE < input.txt > output.txt
 
 ## cron の再設定（重要）
 
-- `cron/jobs.json` を配置しても、ジョブは**自動スケジュールされない**（公式仕様）。
-- 導入後、`hermes cron list` でジョブを確認し、必要なジョブを `hermes cron enable <job-id>`
-  で個別に有効化する（全ジョブを一斉に有効化しないこと）。
-- 有効化後、`hermes cron doctor` でスキル解決・配信ターゲットのエラーを確認する。
+- cron は設定部分移行とは別の既存配布対象。`cron/jobs.json` は配置するが、配布 JSON の
+  `enabled/state` を無効化する処理はない。有効な定義が含まれ得る。
+- gateway・スケジューラを起動する前に、導入先でジョブと配信先を確認する。
+  公式 distribution の cron マージ・停止方針を、この専用 installer に当てはめない。
 
 ## 注意事項
 
 - `chrome-devtools-win` は Windows 機器専用（cmd.exe 経由で Windows 側 Chrome を操作）。
-  Windows 以外の導入先では config.yaml・mcp.json の当該エントリを無効化するか除去する。
+  Windows 以外の導入先では、正本 `mcp.json` の当該エントリを無効化するか除去する。
 - `memories/`・`auth.json`・`.env` は配布対象外。導入先ごとに用意する。
 - 一般化トークン（`<...>` 形式）は復元対象外の説明文・著者表記上の置換である。
 

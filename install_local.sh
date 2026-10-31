@@ -145,6 +145,13 @@ info() { printf '%s\n' "$*"; }
 # 実値を画面に出さないためのマスク（長さのみ表示・裁定③）
 mask_value() { printf '<MASKED:len=%s>' "${#1}"; }
 
+# engine 用 python。README の手順（リポジトリ内 uv venv）を優先し、無ければ PATH の python3。
+PY_BIN="python3"
+if [[ -x "$SRC_ROOT/.venv/bin/python3" ]]; then
+  PY_BIN="$SRC_ROOT/.venv/bin/python3"
+  info "engine python: $PY_BIN（リポジトリ venv を優先）"
+fi
+
 # sed の置換文字列側をエスケープ（\ / &）
 sed_escape() { printf '%s' "$1" | sed -e 's/[\\/&]/\\&/g'; }
 
@@ -202,7 +209,7 @@ expand_name_map() {
 #   - 値の導出（basename 等）は行わない（③「のみから読む」を厳守）
 # ---------------------------------------------------------------------------
 build_env() {
-  local key val entry ph
+  local key val entry ph used_tokens file
   while IFS=$'\t' read -r key val; do
     [[ "$key" == HARNESS_* ]] || continue
     RESOLVED["$key"]="$val"
@@ -210,12 +217,24 @@ build_env() {
 
   expand_name_map
 
+  # 設定全体を移さないため、未使用の dashboard 認証値などは要求しない。
+  # 配置先2変数と、選択した配布ファイル・パス中にあるトークンだけを必須にする。
+  used_tokens='${HERMES_HOME} ${KANBAN_RUNS_DIR}'
+  while IFS= read -r -d '' file; do
+    used_tokens+=" $(printf '%s' "${file#"$SRC_ROOT/"}" | grep -oE '[$][{][A-Z0-9_]+[}]' || true)"
+    if is_text_file "$file"; then
+      used_tokens+=" $(grep -hoE '[$][{][A-Z0-9_]+[}]' "$file" || true)"
+    fi
+  done < <(find_target_files)
+
   for entry in "${PLACEHOLDER_MAP[@]}"; do
     key="${entry#*:}"
     ph="${entry%%:*}"
     val="${RESOLVED[$key]:-}"
     if [[ -z "$val" || "$val" == REPLACE_ME ]]; then
-      MISSING_KEYS+=("$key")
+      if [[ "$used_tokens" == *'${'"$ph"'}'* ]]; then
+        MISSING_KEYS+=("$key")
+      fi
       continue
     fi
     PH_VALUES["$ph"]="$val"
@@ -265,6 +284,7 @@ find_target_files() {
   # find -path は glob を解釈するため、配置元パスをリテラルにする。
   src_pattern="$(printf '%s' "$SRC_ROOT" | sed 's/[][?*\\]/\\&/g')"
   find "$SRC_ROOT" \( -path "$src_pattern/.git" -o -path "$src_pattern/skills" \) -prune -o -type f \
+    ! -path "$src_pattern/config.yaml" \
     ! -name 'install_local.sh' \
     ! -name '.env' \
     ! -name '.env.EXAMPLE' \
@@ -347,7 +367,9 @@ install_tree() {
 # ---------------------------------------------------------------------------
 step1_hermes_check() {
   info '=== step1: hermes 導入確認 ==='
-  command -v python3 >/dev/null 2>&1 || die 'skills.txt の検証には python3 が必要です'
+  command -v "$PY_BIN" >/dev/null 2>&1 || die "engine python が見つかりません: $PY_BIN"
+  "$PY_BIN" -c 'import yaml' >/dev/null 2>&1 \
+    || die '部分移行には PyYAML が必要です。README の手順（uv venv と uv pip install -r pyproject.toml）で .venv を作成してください'
   if command -v hermes >/dev/null 2>&1; then
     info "hermes: $(command -v hermes)"
     return 0
@@ -367,7 +389,7 @@ EOF
 load_selected_skills() {
   [[ -f "$SRC_ROOT/skill_manifest.py" ]] || die 'skill_manifest.py がありません'
   local selected
-  selected="$(python3 "$SRC_ROOT/skill_manifest.py" "$SRC_ROOT")" \
+  selected="$("$PY_BIN" "$SRC_ROOT/skill_manifest.py" "$SRC_ROOT")" \
     || die 'skills.txt の検証に失敗しました（配置前に中止）'
   SKILL_PATHS=()
   if [[ -n "$selected" ]]; then
@@ -456,7 +478,17 @@ show_replacement_table() {
 }
 
 # ---------------------------------------------------------------------------
-# ④ファイル配置（skills・SOUL.md・config.yaml・mcp.json・agent-hooks・criteria）
+# ③b 設定部分移行（MCP 正本 mcp.json・hooks.json・agent-hooks）
+# 競合は他の配布物の配置より前に検出。既存設定の2節以外は変更しない。
+# ---------------------------------------------------------------------------
+run_integrations() {
+  [[ -f "$SRC_ROOT/integration_settings.py" ]] || die 'integration_settings.py がありません'
+  "$PY_BIN" "$SRC_ROOT/integration_settings.py" \
+    --source "$SRC_ROOT" --home "$DEST" --env-file "$ENV_FILE" "$@"
+}
+
+# ---------------------------------------------------------------------------
+# ④ファイル配置（skills・SOUL.md・criteria。設定とhooks本体は③bで管理）
 # ---------------------------------------------------------------------------
 step4_install_files() {
   info "=== step4: ファイル配置 ==="
@@ -471,10 +503,10 @@ step4_install_files() {
   for skill in "${SKILL_PATHS[@]}"; do
     install_tree "$SRC_ROOT/skills/$skill" "$DEST/skills/$skill"
   done
-  for f in SOUL.md config.yaml mcp.json; do
+  for f in SOUL.md; do
     install_one_file "$SRC_ROOT/$f" "$DEST/$f"
   done
-  install_tree "$SRC_ROOT/agent-hooks" "$DEST/agent-hooks"
+
   # criteria は ${KANBAN_RUNS_DIR} 直下（実機の criteria 配置先）
   install_tree "$SRC_ROOT/criteria" "$KANBAN_RUNS_DEST" "criteria/"
   info '[step4] 完了'
@@ -512,6 +544,7 @@ step5_create_profiles() {
       info "($idx) profile \"$new_name\" は既存のため SOUL のみ差し替えます"
     else
       hermes profile create --clone-from default "$new_name"
+      run_integrations --seed-profile "$new_name"
       info "($idx) profile \"$new_name\" を作成しました"
     fi
     mkdir -p "$(dirname "$soul_dest")"
@@ -543,10 +576,10 @@ step6_install_cron() {
   fi
   cat <<'EOF'
 
-  [cron 有効化手順（導入先で手動実行）]
-    1. hermes cron list           # 反映されたジョブ一覧の確認
-    2. hermes cron enable <job-id> # 必要なジョブを個別に有効化
-  （配布版 jobs.json のジョブは既定で無効状態です。全ジョブを一斉に有効化しないこと）
+  [cron は設定部分移行とは別の既存配布対象です]
+    hermes cron list で配置後の状態を確認してください。
+  配布 JSON の enabled/state は変更していません。有効なジョブが含まれ得ます。
+  確認するまで gateway・cron スケジューラを起動しないでください。
 EOF
 }
 
@@ -559,7 +592,7 @@ step7_verify() {
   if [[ "$DRY_RUN" == "yes" ]]; then
     info '[dry-run] 実行予定のチェック:'
     info "[dry-run]  1. hermes profile list で25役が揃っているか"
-    info "[dry-run]  2. $DEST/config.yaml / SOUL.md / mcp.json が配置されているか"
+    info "[dry-run]  2. 既存 config.yaml の MCP/hooks 反映と SOUL.md を確認する"
     info "[dry-run]  3. $DEST/skills / agent-hooks / cron/jobs.json が配置されているか"
     info "[dry-run]  4. criteria の配置先に criteria*.md が配置されているか"
     return 0
@@ -575,7 +608,7 @@ step7_verify() {
   fi
   # 2) 主要ファイル
   local f
-  for f in config.yaml SOUL.md mcp.json; do
+  for f in config.yaml SOUL.md; do
     if [[ ! -f "$DEST/$f" ]]; then
       warn "配置先に $f がありません"
       fail=1
@@ -627,6 +660,7 @@ step7_verify() {
   if [[ "$fail" -ne 0 ]]; then
     die '導入確認で問題が見つかりました（上記の WARN を確認してください）'
   fi
+  run_integrations --verify
   info '[step7] 導入確認 OK'
 }
 
@@ -714,9 +748,14 @@ main() {
   # 配置先の決定（④の前に表示する）
   DEST="${PH_VALUES[HERMES_HOME]}"
   KANBAN_RUNS_DEST="${PH_VALUES[KANBAN_RUNS_DIR]}"
+  # 呼出元のアクティブプロファイルに配置先が引きずられないよう固定する。
+  export HERMES_HOME="$DEST"
+  export HERMES_PROFILE=default
   info "配置先（dest）: $DEST"
   info "criteria 配置先: $KANBAN_RUNS_DEST"
   show_replacement_table
+  # dry-run はロック・退避ファイルも作らず、すべての既存対象を検証する。
+  run_integrations --dry-run
 
   if [[ "$MODE" == "apply" && "$SKIP_CONFIRM" != "yes" ]]; then
     printf '\n実配置を開始します（dest=%s）。よろしいですか? [y/N] ' "$DEST"
@@ -725,6 +764,10 @@ main() {
     [[ "$reply" == "y" || "$reply" == "Y" ]] || die '中止しました'
   fi
 
+  # 設定・hooks のtransaction成功後に、従来の他配布物と新規役を配置する。
+  if [[ "$DRY_RUN" != "yes" ]]; then
+    run_integrations --apply
+  fi
   # ④⑤⑥⑦
   step4_install_files
   step5_create_profiles
@@ -734,7 +777,7 @@ main() {
   if [[ "$MODE" == "dry-run" ]]; then
     info 'dry-run 完了: 何も書き込んでいません。実配置するには --apply を実行してください。'
   else
-    info '導入完了: cron 有効化は上記の手順（step6 の表示）に従ってください。'
+    info '導入完了: hooks の承認・MCP依存・cron状態は導入先で別途確認してください。'
   fi
 }
 

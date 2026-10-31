@@ -1,34 +1,20 @@
-# task-ambi-harness 配布マニフェスト（F6 正本・フルパス版）
-# スキーマ: hermes profile install の distribution.yaml
-#   （hermes_cli/profile_distribution.py DistributionManifest に準拠）
-# env_requires のキー一覧は harness/.env.EXAMPLE（F5 成果物）と一致させる。
-
+# task-ambi-harness 配布マニフェスト
+# 完全な導入・部分設定反映・25役の更新は install_local.sh を使用する。
+# hermes profile install 単体では独自の部分移行処理は実行されない。
 name: task-ambi-harness
-version: 0.1.0
-description: task_ambi 4階層カンバン組織の Hermes ハーネス一式（SOUL・config・skills・agent-hooks・25役 SOUL・criteria・cron）。
+version: 0.2.0
+description: task_ambi の SOUL・選択スキル・MCP・hooks・25役 SOUL・criteria・cron を配布。config.yaml 全体とプラグインは移行しない。
 license: MIT
 env_requires:
   - name: HARNESS_HOME
-    description: 導入先の Hermes ホーム（例 - /home/user/.hermes）
+    description: 導入先の初期設定済み Hermes ホーム
   - name: HARNESS_USER_HOME
-    description: 導入先のユーザホーム（例 - /home/user）。ホーム配下パスの共通接頭辞
+    description: 導入先のユーザホーム
   - name: HARNESS_VAULT_ROOT
-    description: Obsidian vault のルートパス（vault 参照系スキル・cron の復元用）
+    description: Obsidian vault のルートパス
   - name: HARNESS_KANBAN_RUNS_DIR
-    description: ワーク実行ルート（kanban ワーカの実行ディレクトリ）
+    description: criteria の配置先となるワーク実行ルート
   - name: HARNESS_PROJECT_ROOT
-    description: ${REPO_NAME} ローカルリポジトリのパス
-  - name: HARNESS_LANGFUSE_URL
-    description: Langfuse の URL（self-host 環境のホスト名またはIP+ポート）
-  - name: HARNESS_LANGFUSE_PUBLIC_KEY
-    description: Langfuse の public key（プロジェクト設定で発行）
-  - name: HARNESS_LANGFUSE_SECRET_KEY
-    description: Langfuse の secret key（秘匿値のため取り扱い注意）
+    description: ハーネスの正本リポジトリのパス
   - name: HARNESS_PROJECT_NAME_MAP
-    description: プロジェクト一般名と実名の対応（criteria 一般化の復元用。カンマ区切りの一般名=実名ペア）
-  - name: HARNESS_DASHBOARD_BASIC_AUTH_USERNAME
-    description: ダッシュボード basic auth のユーザ名
-  - name: HARNESS_DASHBOARD_BASIC_AUTH_PASSWORD_HASH
-    description: ダッシュボード basic auth の scrypt パスワードハッシュ（秘匿値のため取り扱い注意）
-  - name: HARNESS_DASHBOARD_BASIC_AUTH_SECRET
-    description: ダッシュボード basic auth の secret トークン（秘匿値のため取り扱い注意）
+    description: 一般名と正式名の対応。専用 installer では直値キーによる指定も可能
