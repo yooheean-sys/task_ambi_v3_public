@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ============================================================================
-# install_local.sh — task_ambi_v3_public（task-ambi-harness）ローカル導入スクリプト
+# install_local.sh — ${REPO_NAME}_public（task-ambi-harness）ローカル導入スクリプト
 #
 # 出典: ${REPO_NAME}/docs/harness_migration_plan.md §5 P4（install_local.sh 実装）
 # 上位層裁定（親カード t_5b7e0e6c で確定した内容を継承・原文どおり）:
 #  ① 実行形態は「hermes profile 機能による導入」を前提とする
-#  ② ソースは task_ambi_v3_public リポジトリ内のファイルのみを対象とする
+#  ② ソースは ${REPO_NAME}_public リポジトリ内のファイルのみを対象とする
 #  ③ 値の供給は .env（導入先が記入）の HARNESS_* 変数のみから読む。
 #     名称マップ（HARNESS_PROJECT_NAME_MAP から ${PROJECT_*_NAME} 等を展開）も含め、
 #     F4 の replace_for_deploy() と同一の結果になること。
@@ -24,6 +24,7 @@
 #  ② .env 読み込み（無ければ .env.EXAMPLE をコピーして記入を案内して終了）
 #  ③ 逆方向置換の準備（HARNESS_* → プレースホルダ値。欠落キーは一覧表示して失敗）
 #  ④ ファイル配置（内容＋ディレクトリ名の両方を置換）
+#     skills は skills.txt の登録分のみ。未登録の既存スキルは削除しない。
 #  ⑤ 25役生成（hermes profile create --clone-from default ＋ souls/ から SOUL 差し替え）
 #  ⑥ cron jobs.json 配置（既存は .orig 退避）＋ cron 有効化手順の表示
 #  ⑦ 導入確認（profile list・配置ファイルの存在確認）
@@ -34,7 +35,7 @@
 # 埋め込み一覧方式（動的走査禁止）: 一覧に無い ${...} は置換しない。
 #
 # 使い方:
-#   cd task_ambi_v3_public
+#   cd ${REPO_NAME}_public
 #   cp .env.EXAMPLE .env   # REPLACE_ME を導入先の実値で置き換える
 #   bash install_local.sh --dry-run              # 書き込まず配置先と置換内容を確認
 #   bash install_local.sh --apply                # 実配置（profile 作成を含む）
@@ -59,7 +60,7 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
-# 埋め込み一覧（③の正本）: F4 REVERSE_MAP と完全一致・24 プレースホルダ。
+# 埋め込み一覧（③の正本）: F4 REVERSE_MAP と完全一致・25 プレースホルダ。
 # 形式: "プレースホルダ名:HARNESS_* キー"
 # ---------------------------------------------------------------------------
 PLACEHOLDER_MAP=(
@@ -130,6 +131,7 @@ declare -A PH_VALUES=()     # プレースホルダ名 → 値（置換用）
 declare -A PH_SOURCE=()     # プレースホルダ名 → 供給源 (direct | name-map)
 MISSING_KEYS=()             # 欠落 HARNESS_* キーの一覧
 SED_ARGS=()                 # sed に渡す引数配列
+SKILL_PATHS=()              # skills.txt で事前登録した skills/ 相対パス
 DEST=""                     # 配置先（HARNESS_HOME）
 KANBAN_RUNS_DEST=""         # criteria 配置先（HARNESS_KANBAN_RUNS_DIR）
 
@@ -257,10 +259,12 @@ is_text_file() {
   return 1
 }
 
-# 置換対象ファイルの列挙（.git・本スクリプト・.env・バイナリ拡張子を除外）。
+# 置換対象ファイルの列挙（skills は登録分のみ。.git・本スクリプト・.env 等は除外）。
 find_target_files() {
-  find "$SRC_ROOT" -type f \
-    ! -path '*/.git/*' \
+  local skill src_pattern
+  # find -path は glob を解釈するため、配置元パスをリテラルにする。
+  src_pattern="$(printf '%s' "$SRC_ROOT" | sed 's/[][?*\\]/\\&/g')"
+  find "$SRC_ROOT" \( -path "$src_pattern/.git" -o -path "$src_pattern/skills" \) -prune -o -type f \
     ! -name 'install_local.sh' \
     ! -name '.env' \
     ! -name '.env.EXAMPLE' \
@@ -268,6 +272,9 @@ find_target_files() {
     ! -name '*.ico' ! -name '*.pdf' ! -name '*.pyc' ! -name '*.so' \
     ! -name '*.db' ! -name '*.sqlite3' \
     -print0
+  for skill in "${SKILL_PATHS[@]}"; do
+    find "$SRC_ROOT/skills/$skill" -type f -print0
+  done
 }
 
 # 未知プレースホルダの検出（③付随）: 埋め込み一覧に無い ${X} で X が
@@ -284,11 +291,13 @@ detect_unknown_placeholders() {
     tok="${tok%?}"      # 末尾 "}" を除去
     [[ "$known" == *"|$tok|"* ]] && continue
     printf '%s\n' "$tok"
-  done < <(grep -rhoE --exclude-dir=.git "$pattern" \
-      --include='*.md' --include='*.txt' --include='*.yaml' --include='*.yml' \
-      --include='*.json' --include='*.py' --include='*.sh' --include='*.toml' \
-      --include='*.cfg' --include='*.ini' --include='*.example' \
-      "$SRC_ROOT" 2>/dev/null | sort -u)
+  done < <(
+    while IFS= read -r -d '' file; do
+      if is_text_file "$file"; then
+        grep -hoE "$pattern" "$file" || true
+      fi
+    done < <(find_target_files) | sort -u
+  )
 }
 
 # ---------------------------------------------------------------------------
@@ -338,6 +347,7 @@ install_tree() {
 # ---------------------------------------------------------------------------
 step1_hermes_check() {
   info '=== step1: hermes 導入確認 ==='
+  command -v python3 >/dev/null 2>&1 || die 'skills.txt の検証には python3 が必要です'
   if command -v hermes >/dev/null 2>&1; then
     info "hermes: $(command -v hermes)"
     return 0
@@ -352,8 +362,21 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# ②.env 読み込み（無ければ .env.EXAMPLE をコピーして記入を案内して終了）
+# skills.txt の事前検証（不正なリストでは配置も .env 雛形の作成もしない）
 # ---------------------------------------------------------------------------
+load_selected_skills() {
+  [[ -f "$SRC_ROOT/skill_manifest.py" ]] || die 'skill_manifest.py がありません'
+  local selected
+  selected="$(python3 "$SRC_ROOT/skill_manifest.py" "$SRC_ROOT")" \
+    || die 'skills.txt の検証に失敗しました（配置前に中止）'
+  SKILL_PATHS=()
+  if [[ -n "$selected" ]]; then
+    mapfile -t SKILL_PATHS <<< "$selected"
+  fi
+  info "[skills] skills.txt 登録 ${#SKILL_PATHS[@]} 件（未登録は配置しない）"
+}
+
+# ②.env 読み込み（無ければ .env.EXAMPLE をコピーして記入を案内して終了）
 step2_load_env() {
   info '=== step2: .env の読み込み ==='
   if [[ -z "$ENV_FILE" ]]; then
@@ -441,7 +464,13 @@ step4_install_files() {
   if [[ "$DRY_RUN" == "yes" ]]; then
     info '[dry-run] 書き込みは行いません（配置先パスと置換後の語を表示するのみ）'
   fi
-  install_tree "$SRC_ROOT/skills" "$DEST/skills"
+  local skill
+  if [[ "$DRY_RUN" != "yes" ]]; then
+    mkdir -p "$DEST/skills"
+  fi
+  for skill in "${SKILL_PATHS[@]}"; do
+    install_tree "$SRC_ROOT/skills/$skill" "$DEST/skills/$skill"
+  done
   for f in SOUL.md config.yaml mcp.json; do
     install_one_file "$SRC_ROOT/$f" "$DEST/$f"
   done
@@ -576,11 +605,20 @@ step7_verify() {
   #    正当に存在するため除外する（P6 裁定 2026-10-24・prefix-only の旧 BRE は
   #    これを誤検出していた。step3 detect_unknown_placeholders と同じ
   #    「接頭辞＋閉じトークン」の形に揃える）。
-  local leftover prefixes_re
+  local leftover="" prefixes_re skill skill_dest
   prefixes_re="$(IFS='|'; printf '%s' "${PLACEHOLDER_PREFIXES[*]}")"
-  leftover="$(grep -rlE --include='*.md' --include='*.yaml' --include='*.json' \
-      "\\\$[{](${prefixes_re})[A-Za-z0-9_]+[}]" \
-      "$DEST/skills" 2>/dev/null | head -3 || true)"
+  # 今回配置したスキルだけを検証する。他の既存スキルは変更・検査しない。
+  for skill in "${SKILL_PATHS[@]}"; do
+    skill_dest="$(replace_path "$DEST/skills/$skill")"
+    if [[ ! -f "$skill_dest/SKILL.md" ]]; then
+      warn "登録スキルの SKILL.md が配置されていません: $skill_dest"
+      fail=1
+    fi
+    leftover="$(grep -rlE --include='*.md' --include='*.yaml' --include='*.json' \
+        "\\\$[{](${prefixes_re})[A-Za-z0-9_]+[}]" \
+        "$skill_dest" 2>/dev/null | head -3 || true)"
+    [[ -z "$leftover" ]] || break
+  done
   if [[ -n "$leftover" ]]; then
     warn 'skills 内に未置換のハーネスプレースホルダが残っています（例）:'
     warn "$leftover"
@@ -667,6 +705,8 @@ main() {
 
   # ① hermes 導入確認
   step1_hermes_check
+  # 許可リストを配置や .env 雛形の作成より前に検証する。
+  load_selected_skills
   # ② .env 読み込み
   step2_load_env
   # ③ 逆方向置換の準備

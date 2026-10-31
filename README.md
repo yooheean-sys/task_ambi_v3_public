@@ -14,7 +14,9 @@ distribution.yaml   配布マニフェスト（name・version・license・env_re
 SOUL.md             default プロファイルの SOUL
 config.yaml         default の config（hooks・mcp_servers を含む）
 mcp.json            MCP 接続定義
-skills/             共有スキル一式
+skills.txt          配布対象スキルの相対パス許可リスト
+skill_manifest.py   許可リストの共通検証処理（Python 標準ライブラリのみ）
+skills/             skills.txt に登録したスキルと同梱ファイル
 agent-hooks/        mermaid-check 等
 souls/              25役分の SOUL.md（souls/<役名>/SOUL.md・profiles.txt と対応）
 profiles.txt        25役のプロファイル名一覧
@@ -24,6 +26,29 @@ install_local.sh    ローカル導入スクリプト（.env 読込 → 逆方�
 LICENSE             MIT ライセンス
 README.md           本ファイル
 ```
+
+## スキルの配布対象
+
+スキルは `skills.txt` に事前登録したものだけを配布・導入する。1行に1スキル、
+`skills/` を基準とする相対ディレクトリを書く。たとえば次の内容なら2件だけが対象になる。
+
+```text
+vault/vault_custom_scripts
+pbi
+```
+
+- 正本では `harness/skills.txt` を編集する。対応する実体は `harness/skills/` に置く。
+- 各登録先に `SKILL.md` が必要。同じディレクトリ内の references・scripts・assets も対象。
+  カテゴリの説明書など、登録したスキルディレクトリの外にあるファイルは配布しない。
+- 空行と `#` から始まるコメント行は無視する。行の前後の空白は取り除く。
+- ワイルドカード・絶対パス・親ディレクトリ参照・重複・シンボリックリンクは許可しない。
+- リスト未作成・登録先の欠落・不正な指定は生成や導入の書き込み前にエラーとなる。
+  空のリストは「スキルを配布しない」の意味であり、全件コピーには戻らない。
+- 依存スキルは自動追加しない。必要なものを個別に登録する。
+- 既存配布対象を初期登録しているが、その後スキルを増やしても自動では登録されない。
+- 導入先の未登録スキルは削除しない。リストから外したスキルを公開版から除くには、
+  正本側でリストを変更して再生成する。
+- 公開側のリストとディレクトリ名には同じ公開用置換が適用される。
 
 ## 導入手順
 
