@@ -7,7 +7,7 @@ license: MIT
 metadata:
   hermes:
     tags: [speckit, spec, audit, serena, task-ambi]
-    related_skills: [${PROJECT_NAME}_persona_migration]
+    related_skills: [taskambi_persona_migration]
 ---
 
 # 仕様完全性オーディット（speckit 型 specs/ ツリー）

@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_harness_distribution
+name: taskambi_harness_distribution
 description: "Use when Hermesハーネスを機器間移行または公開配布するとき。"
 version: 1.1.0
 author: ${USER_NAME_LOWER}, Hermes Agent
@@ -18,7 +18,7 @@ task_ambi 4層カンバン組織のハーネス（default プロファイル直�
 - Hermes のプロファイル群・スキル・SOUL・config・hooks・criteria を別機器へ移す・別機器で再現する
 - 公開用にパス・機密を除去した配布リポジトリを作る・更新する・push する
 - 移行・配布で「何を移すか」「どの公式機構を使うか」「どこに機密が散在するか」を判断するとき
-- 使わない: プロファイル単体の作成・役割の移植（${PROJECT_NAME}_persona_migration）、組織の起動（${PROJECT_NAME}_boot）、kanban 運用そのもの（${PROJECT_NAME}_kanban-agent-org）
+- 使わない: プロファイル単体の作成・役割の移植（taskambi_persona_migration）、組織の起動（taskambi_boot）、kanban 運用そのもの（taskambi_kanban-agent-org）
 
 ## 常時ルール
 - スキルの配布対象は正本 `harness/skills.txt` の明示許可リストで管理する。各行は `harness/skills/` 相対のスキルディレクトリ（例 `vault/vault_custom_scripts`・`pbi`）。未登録スキルの自動追加や、リスト欠落時の全件コピーをしない。
@@ -54,6 +54,7 @@ task_ambi 4層カンバン組織のハーネス（default プロファイル直�
 - 裁定済み: 公開リポジトリは ${REPO_NAME}_public（GitHub リポジトリ本体はユーザーが作成する）・h01 系 criteria も公開可（機密プロジェクトではない）・cron はそのまま配布。
 - task_ambi_public は v2 専用リポジトリ — v3 用に流用しない。
 - 役割名の一般化: project_lead の役割名・criteria ファイル名は `${PROJECT_<code>_NAME}` プレースホルダで一般化する（例: `project_lead_${PROJECT_G01_NAME}`・`criteria_project_lead_${PROJECT_G01_NAME}.md`）。`${ORG_NAME}` や実名の直書きに寄せない。
+- 例外（2026-10-31 人間裁定）: カテゴリ名 `taskambi` は公開でもリテラル保持。F4 の `taskambi → ${PROJECT_NAME}` は廃止し、REVERSE_MAP・installer・engine の対応定義からも削除済み（三者を同時に更新しないと自己テストが失敗する）。
 - 公開生成スクリプトと置換表は正本の `scripts/` 配下に置き、生成物リポジトリとは分離する。導入スクリプトの正本は `harness/install_local.sh`、許可リストの共通検証処理は `harness/skill_manifest.py`。公開側だけの手編集で終わらせない。
 
 ## references

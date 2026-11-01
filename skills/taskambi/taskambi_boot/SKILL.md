@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_boot
+name: taskambi_boot
 description: task_ambi V3（4階層カンバン組織）を起動して作業させるときの起動手順。
 version: 0.3.0
 author: ${USER_NAME_LOWER}, Hermes Agent
@@ -7,18 +7,18 @@ license: private
 metadata:
   hermes:
     tags: [task_ambi, kanban, boot, 4tier-org]
-    related_skills: [${PROJECT_NAME}_kanban-agent-org, ${PROJECT_NAME}_project]
+    related_skills: [taskambi_kanban-agent-org, taskambi_project]
 ---
 
-# ${PROJECT_NAME}_boot — 4階層カンバン組織の起動
+# taskambi_boot — 4階層カンバン組織の起動
 
 通常の会話モードとは別に、task_ambi V3 設計の4階層カンバン組織（planner → project_lead → 第3層3役 → 実行15役）を kanban 上へ起動して作業させるとき専用の起動手順。発動中は成果物を自分で書かず、組織への起票・監視・検収サポート・完了報告を担う起動オーケストレーターとして振る舞う。
 
-kanban のメカニクス（create / link / watch / archive・依存の向き・復旧手順）と起票本文テンプレートの正本は skill '${PROJECT_NAME}_kanban-agent-org' と `~/kanban-guide.md`。**起票前に '${PROJECT_NAME}_kanban-agent-org' を読み込んでから**以下の手順に入る。本ファイルはその内容を繰り返さない。
+kanban のメカニクス（create / link / watch / archive・依存の向き・復旧手順）と起票本文テンプレートの正本は skill 'taskambi_kanban-agent-org' と `~/kanban-guide.md`。**起票前に 'taskambi_kanban-agent-org' を読み込んでから**以下の手順に入る。本ファイルはその内容を繰り返さない。
 
 ## When to Use
 
-- 「${PROJECT_NAME}起動して」「ta起動」「4階層カンバン組織で〜して」等、組織を起動して作業させる指示
+- 「taskambi起動して」「ta起動」「4階層カンバン組織で〜して」等、組織を起動して作業させる指示
 - 対象リポジトリが決まっていて GitLab の PBI を指定して実行したいとき（glab で拾う）
 - 使わない: 単発の質問・軽微な調整・組織を起動するまでもない作業 → 普通の会話で処理する
 
@@ -73,7 +73,7 @@ kanban のメカニクス（create / link / watch / archive・依存の向き・
 
 ### 5. ルートカードを起票する
 
-- 本文チェックリスト（テンプレート形は ${PROJECT_NAME}_kanban-agent-org「サンプル実行の手順」3）: 固定の成果物ファイル名（原文引き継ぎ・言い換え禁止）／workspace 統一の指示／「上位3層は分解・判断・検収のみ」の一文／【未確定点の扱い】3行型（未確定が無い場合もその旨明記）／プロジェクトモード時は対象プロジェクトと契約（.hermes.md）の参照指示
+- 本文チェックリスト（テンプレート形は taskambi_kanban-agent-org「サンプル実行の手順」3）: 固定の成果物ファイル名（原文引き継ぎ・言い換え禁止）／workspace 統一の指示／「上位3層は分解・判断・検収のみ」の一文／【未確定点の扱い】3行型（未確定が無い場合もその旨明記）／プロジェクトモード時は対象プロジェクトと契約（.hermes.md）の参照指示
 - 本文はファイル化して渡す（長い --body は承認ゲートで止まりやすい）:
 
 ```bash
@@ -82,7 +82,7 @@ hermes kanban create "<タイトル>" \
   --assignee <planner または project_lead_<正式名>> \
   --workspace dir:<絶対パス> \
   --max-runtime <規模に応じて。例: 40m> \
-  --created-by ${PROJECT_NAME}_boot
+  --created-by taskambi_boot
 ```
 
 - PBI・対話で確定済みの内容はそのまま起票してよい（追加の承認ゲートを挟まない）。確定していない点が残る場合、または起票のために新規ディレクトリを作る必要がある場合だけ、起票前に選択肢+推奨を付けて承認を得る
@@ -92,7 +92,7 @@ hermes kanban create "<タイトル>" \
 
 - `hermes kanban watch` を background で流し、2〜4分ごとに `hermes kanban list` を確認する
 - 監視中に増えたカード ID を随時記録する（完了時のレポートで拾い直さなくてよいように）
-- 停滞の兆候: spawn_failed / gave_up / 同名カードの重複 / blocked。復旧は ${PROJECT_NAME}_kanban-agent-org の落とし穴節の手順に従う
+- 停滞の兆候: spawn_failed / gave_up / 同名カードの重複 / blocked。復旧は taskambi_kanban-agent-org の落とし穴節の手順に従う
 - **分解役カードが完了した直後に「申告子タスク vs 実際に増えたカード」を突合し、逸脱は即座に封じ込める**（実測 2026-10-17: 5 run 中 3 run で分解役が同一内容を連投。親リンク無しの ready カード・scratch 誤起票・"ws-path probe" "test" 等のプローブ風タイトルが兆候）。突合で迷子を見つけたら正規カード（親リンク済み・本文に注記があるもの）だけを残し、其余に【無効・着手禁止】コメントを付けて `hermes kanban block <id> --ids <残り> --kind needs_input "重複起票のため無効化（正規カード <id> に集約）"` で止める。読み取り専用の重複は実害が無いが spawn 費用と混乱を避けるため blocked にする。封じ込めの経緯は親カードにも kanban_comment で記録する
 - review の changes_requested → 自動 requeue → 再 spawn → 指摘のみ修正 → 再 review は**正常な自己修復**であり停滞ではない（実測: 2回自動発火・いずれも round 2 合格）。停滞と区別して放置する
 - 分解役完了直後には、後続カードの依存親が「前提を実際に届けるカード（実装リーフ等）」になっているかも確認する。分解リードカードだけを依存親にすると premature promote になり、実行役が実測確認で自己停止して回収に余分な時間がかかる（実測: テスト1で発火・自己停止と再開で回収）。ルート本文に「順序依存は実装リーフを親にする」指示を入れておくと発火率が下がる
@@ -123,7 +123,7 @@ hermes kanban create "<タイトル>" \
 - プロジェクトモード（planner 飛ばし）では判定・振り分けがルート本文の明記頼みになる — 参照先（.hermes.md・ディレクトリ）を省略しない
 - 分解役ワーカーの kanban_create 連投（重複・プローブ起票）が低コストモデルで再発しやすい（実測: 5 run 中 3 run・planner 配下の project_lead と system_engineer で発生）。対策は二段構えで適用済み: 分解担当5役 SOUL の「起票の自己検証」条項（2026-10-17 人間承認・次回 spawn から反映）＋本スキル手順6の突合→即封じ込め。発火確認は次回 run
 - 長い外部書き込みコマンド（glab issue create 等）や heredoc→python へのパイプは承認ゲートで止まりやすい（実測: ゲートタイムアウト2回）。タイムアウトしたら再実行せず状況と次の一手を人間に提示して待つ。人間の返信で承認が得られた後は同じコマンドを再実行してよい
-- その他の kanban メカニクス上の罠（重複起票・詰みカード復旧・差戻しループ等）は skill '${PROJECT_NAME}_kanban-agent-org' の落とし穴節が正本
+- その他の kanban メカニクス上の罠（重複起票・詰みカード復旧・差戻しループ等）は skill 'taskambi_kanban-agent-org' の落とし穴節が正本
 
 ## Verification
 

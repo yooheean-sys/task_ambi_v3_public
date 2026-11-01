@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_sdd-worker-rules
+name: taskambi_sdd-worker-rules
 description: "Use when SDD で作業役として工程カード(specify〜最終レポート)を実行するとき。"
 version: 1.0.0
 ---

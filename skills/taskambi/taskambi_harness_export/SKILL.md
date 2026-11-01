@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_harness_export
+name: taskambi_harness_export
 description: "Use when ${REPO_NAME} のハーネス変更を ${REPO_NAME}_public へ公開するとき。"
 version: 1.0.0
 author: ${USER_NAME_LOWER}
@@ -15,8 +15,8 @@ metadata:
 公開リポジトリ `${REPO_NAME}_public`（`${REPO_ROOT}_public`）
 へ反映して公開する手順。移行の入口はこの 1 本道であり、別経路で同じ結果を作らない。
 
-ドメイン規程（配布の契約・落とし穴）は `${PROJECT_NAME}_harness_distribution`、導入先側は
-`${PROJECT_NAME}_harness_import` を参照する。
+ドメイン規程（配布の契約・落とし穴）は `taskambi_harness_distribution`、導入先側は
+`taskambi_harness_import` を参照する。
 
 ## 常時ルール
 

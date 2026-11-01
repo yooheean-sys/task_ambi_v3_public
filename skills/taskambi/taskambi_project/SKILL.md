@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_project
+name: taskambi_project
 description: task_ambi作業時。ソース管理は ~/project/task_ambi/${REPO_NAME} が基本。
 version: 1.0
 author: ${USER_NAME_LOWER}
@@ -7,7 +7,7 @@ license: private
 metadata:
   hermes:
     tags: [task_ambi, git, gitlab]
-    related_skills: [${PROJECT_NAME}_kanban-agent-org, ${PROJECT_NAME}_boot]
+    related_skills: [taskambi_kanban-agent-org, taskambi_boot]
 ---
 
 # task_ambi プロジェクト

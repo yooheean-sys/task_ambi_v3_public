@@ -8,7 +8,7 @@ license: MIT
 metadata:
   hermes:
     tags: [langfuse, observability, evals]
-    related_skills: [${PROJECT_NAME}_kanban-agent-org]
+    related_skills: [taskambi_kanban-agent-org]
 ---
 
 # セルフホスト Langfuse 連携（events_only）

@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_harness_import
+name: taskambi_harness_import
 description: "Use when ${REPO_NAME}_public から導入先の Hermes へハーネスを導入・更新するとき。"
 version: 1.0.0
 author: ${USER_NAME_LOWER}
@@ -14,8 +14,8 @@ metadata:
 公開リポジトリ `${REPO_NAME}_public` を導入先マシンの Hermes へ導入・更新する手順。
 経路は **`install_local.sh` の 1 本**であり、他の経路で同じ結果を作らない。
 
-生成側（正本 → 公開）は `${PROJECT_NAME}_harness_export`、ドメイン規程は
-`${PROJECT_NAME}_harness_distribution` を参照する。
+生成側（正本 → 公開）は `taskambi_harness_export`、ドメイン規程は
+`taskambi_harness_distribution` を参照する。
 
 ## 常時ルール
 

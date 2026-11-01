@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_sync_project_lead
+name: taskambi_sync_project_lead
 description: project_lead_* 全複製の SOUL.md 共通節を点検・同期する。
 version: 0.1.0
 author: ${USER_NAME}, Hermes Agent
@@ -8,16 +8,16 @@ platforms: [linux]
 metadata:
   hermes:
     tags: [kanban, project_lead, SOUL, maintenance, harness]
-    related_skills: [${PROJECT_NAME}_kanban-agent-org]
+    related_skills: [taskambi_kanban-agent-org]
 ---
 
-# ${PROJECT_NAME}_sync_project_lead Skill
+# taskambi_sync_project_lead Skill
 
 project_lead_* プロファイル（全複製）の SOUL.md を「共通指示は全複製で同一・プロジェクト固有部は各プロジェクトのまま」に保つ点検・同期ツール。共通節の正本（唯一の真実の源）はスキル同梱の `references/project_lead_canonical.md`。スクリプトは Python 標準ライブラリのみで動く。
 
 ## When to Use
 
-- project_lead の SOUL.md 運用ルールを改訂し、全複製へ同じ改訂を適用するとき（${PROJECT_NAME}_kanban-agent-org の「発散管理: 改訂は全 project_lead_* 複製へ適用」規則の実行）
+- project_lead の SOUL.md 運用ルールを改訂し、全複製へ同じ改訂を適用するとき（taskambi_kanban-agent-org の「発散管理: 改訂は全 project_lead_* 複製へ適用」規則の実行）
 - project_lead_* 間で共通指示が発散していないか点検するとき
 - 新規 project_lead_<名前> を複製した後、正本と一致しているか確認するとき
 - Don't use for: プロジェクト固有節（ルートパス・ディレクトリ契約など）の内容設計。それは人間の裁定＋ capture で行う
@@ -31,7 +31,7 @@ project_lead_* プロファイル（全複製）の SOUL.md を「共通指示�
 
 ## How to Run
 
-`skill_view('${PROJECT_NAME}_sync_project_lead')` で skill_dir を取得し SCRIPT を組み立てて `terminal` で実行する。
+`skill_view('taskambi_sync_project_lead')` で skill_dir を取得し SCRIPT を組み立てて `terminal` で実行する。
 
 ## Quick Reference
 

@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_sdd-pipeline
+name: taskambi_sdd-pipeline
 description: "Use when SDD の SE として工程カードの起票・判定・修正ループ制御を行う。"
 version: 1.0.0
 ---

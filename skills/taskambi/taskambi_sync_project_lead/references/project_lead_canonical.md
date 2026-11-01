@@ -1,4 +1,4 @@
-# project_lead 共通節 正本（${PROJECT_NAME}_sync_project_lead）
+# project_lead 共通節 正本（taskambi_sync_project_lead）
 # 全 project_lead_* プロファイルの SOUL.md 共通節の正本。編集は人間承認の上で行うか、
 # capture --from <profile> で再採録する（capture は required/except の指定を保持する）。
 #

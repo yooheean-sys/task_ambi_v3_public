@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_sdd-setup
+name: taskambi_sdd-setup
 description: "Use when SDD をリポジトリにセットアップするとき。対象確認・前提検査・ガード生成を行う。"
 version: 1.0.0
 ---

@@ -1,5 +1,5 @@
 ---
-name: ${PROJECT_NAME}_sdd-project-lead
+name: taskambi_sdd-project-lead
 description: "Use when SDD でプロジェクト統括として計画分解・統括判定・人間へのエスカレーションを行う。"
 version: 1.0.0
 ---
