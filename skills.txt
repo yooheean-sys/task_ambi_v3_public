@@ -1,19 +1,21 @@
 # 配布対象スキルの許可リスト
 # harness/skills/ を基準とする相対ディレクトリを1行に1件記載する。
 # 新規スキルはこの一覧へ明示追加するまで配布しない。
-# Hermes 同梱スキル・公式配布スキルは skills_ignore.txt へ記載し、ここへ登録しない。
+# Hermes 同梱スキル・公式配布スキル・外部取り込みスキルは skills_ignore.txt へ記載し、
+# ここへ登録しない。
 # 空行と # から始まるコメント行は無視する。ワイルドカードは使えない。
 
 autonomous-ai-agents/hermes-backend-ops
 autonomous-ai-agents/hermes-desktop-app
+autonomous-ai-agents/hermes-skill-curation
 autonomous-ai-agents/multi-project-agent-roles
-devops/langfuse-selfhosted
-discord-gateway-troubleshooting
+create-pbi
+deep-research
+grilling
 hermes-browser-automation
 hermes-shell-hooks
 hermes-webhook-file-trigger
 mkdocs-documentation
-pbi
 software-development/spec-completeness-audit
 taskambi/taskambi_boot
 taskambi/taskambi_harness_distribution
@@ -27,7 +29,7 @@ taskambi/taskambi_sdd-project-lead
 taskambi/taskambi_sdd-setup
 taskambi/taskambi_sdd-worker-rules
 taskambi/taskambi_sync_project_lead
-tr/tr
+tr
 vault/vault_custom_scripts
 vault/vault_inbox_classification
 vault/vault_search

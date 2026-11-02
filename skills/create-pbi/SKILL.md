@@ -1,5 +1,5 @@
 ---
-name: pbi
+name: create-pbi
 description: PBIを起票するとき。grilling対話→PBI整形→glabでGitLab起票まで。
 version: 1.0
 author: ${USER_NAME_LOWER}
