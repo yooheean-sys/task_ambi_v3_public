@@ -89,3 +89,9 @@ speckit-plan
 speckit-specify
 speckit-tasks
 speckit-taskstoissues
+
+# 自作だが配布しないスキル（2026-11-02 裁定）
+devops/langfuse-selfhosted
+discord-gateway-troubleshooting
+# pbi は create-pbi に代替された旧版
+pbi
