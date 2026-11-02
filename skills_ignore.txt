@@ -64,3 +64,28 @@ software-development/spike
 software-development/systematic-debugging
 software-development/test-driven-development
 web/blocked-page-recovery
+
+# 外部取り込みスキル（自作ではないため配布しない・導入先で再取り込み）
+# - claude-code-imports/*: agent-importers による Claude Code からの取り込み分
+# - speckit-*: github-spec-kit 由来（metadata.author: github-spec-kit）
+claude-code-imports/ask-docs
+claude-code-imports/design-agent
+claude-code-imports/design-task
+claude-code-imports/find-skills
+claude-code-imports/getting-started
+claude-code-imports/grill-me
+claude-code-imports/grilling
+claude-code-imports/meeting-notes
+claude-code-imports/obsidian
+claude-code-imports/obsidian-cli
+claude-code-imports/skill-creator
+speckit-analyze
+speckit-checklist
+speckit-clarify
+speckit-constitution
+speckit-converge
+speckit-implement
+speckit-plan
+speckit-specify
+speckit-tasks
+speckit-taskstoissues

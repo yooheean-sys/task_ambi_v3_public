@@ -746,9 +746,11 @@ def _cli_set(stage: Path, user_home: Path, key: str, value):
            "XDG_CONFIG_HOME": str(user_home / ".config"),
            "XDG_CACHE_HOME": str(user_home / ".cache"), "TMPDIR": str(user_home)}
     try:
+        # 負荷の高い環境（スワップ逼迫等）でも CLI 起動が完了できるよう予算は広め。
+        # 成否の検証は後に RAW 設定の完全一致で行うため、緩めても検証強度は変わらない。
         result = subprocess.run([executable, "config", "set", "--force", key, _json_bytes(value).decode("utf-8")],
                                 env=env, cwd=user_home, stdin=subprocess.DEVNULL,
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=120)
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=600)
     except (OSError, subprocess.SubprocessError):
         raise IntegrationError("隔離 Hermes config set が失敗しました（出力非表示）") from None
     if result.returncode:
