@@ -18,6 +18,7 @@ hermes-webhook-file-trigger
 mkdocs-documentation
 software-development/spec-completeness-audit
 taskambi/taskambi_boot
+taskambi/taskambi_conduct_review
 taskambi/taskambi_harness_distribution
 taskambi/taskambi_harness_export
 taskambi/taskambi_harness_import

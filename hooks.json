@@ -1,5 +1,11 @@
 {
   "hooks": {
+    "on_session_end": [
+      {
+        "command": "python3 ${HERMES_HOME}/agent-hooks/taskambi-review.py detect",
+        "timeout": 30
+      }
+    ],
     "pre_tool_call": [
       {
         "matcher": "write_file|patch",
