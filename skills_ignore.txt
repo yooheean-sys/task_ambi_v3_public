@@ -27,7 +27,6 @@ creative/songwriting-and-ai-music
 devops/sdlc-review
 email/email-inbox-triage
 email/himalaya
-glab
 media/gif-search
 media/songsee
 media/youtube-content
@@ -95,3 +94,9 @@ devops/langfuse-selfhosted
 discord-gateway-troubleshooting
 # pbi は create-pbi に代替された旧版
 pbi
+
+# 手作業で移行するスキル（2026-11-03 裁定・配布せず導入先で手動再取り込み）
+# - glab: gitlab-org/cli 同梱の agent skills。`glab skills --path .hermes/skills` でインポート
+# - obsidian-cli: skills.sh カタログ（kepano/obsidian-skills）。`hermes skills install` で導入
+glab
+obsidian-cli
