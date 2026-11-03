@@ -486,7 +486,7 @@ run_integrations() {
 }
 
 # ---------------------------------------------------------------------------
-# ④ファイル配置（skills・SOUL.md・criteria。設定とhooks本体は③bで管理）
+# ④ファイル配置（skills・SOUL.md・criteria・glossary。設定とhooks本体は③bで管理）
 # ---------------------------------------------------------------------------
 step4_install_files() {
   info "=== step4: ファイル配置 ==="
@@ -507,6 +507,8 @@ step4_install_files() {
 
   # criteria は ${KANBAN_RUNS_DIR} 直下（実機の criteria 配置先）
   install_tree "$SRC_ROOT/criteria" "$KANBAN_RUNS_DEST" "criteria/"
+  # glossary は criteria と同じ ${KANBAN_RUNS_DIR} 直下に並置する
+  install_tree "$SRC_ROOT/glossary" "$KANBAN_RUNS_DEST" "glossary/"
   info '[step4] 完了'
 }
 
@@ -592,7 +594,7 @@ step7_verify() {
     info "[dry-run]  1. hermes profile list で25役が揃っているか"
     info "[dry-run]  2. 既存 config.yaml の MCP/hooks 反映と SOUL.md を確認する"
     info "[dry-run]  3. $DEST/skills / agent-hooks / cron/jobs.json が配置されているか"
-    info "[dry-run]  4. criteria の配置先に criteria*.md が配置されているか"
+    info "[dry-run]  4. criteria・glossary の配置先に criteria*.md / glossary*.md が配置されているか"
     return 0
   fi
   # 1) profile 数（hermes profile list の行数は環境により異なるため、profiles/ の
@@ -624,9 +626,13 @@ step7_verify() {
     warn '配置先に cron/jobs.json がありません'
     fail=1
   fi
-  # 5) criteria
+  # 5) criteria・glossary
   if ! ls "$KANBAN_RUNS_DEST"/criteria*.md >/dev/null 2>&1; then
     warn "criteria 配置先に criteria*.md がありません: $KANBAN_RUNS_DEST"
+    fail=1
+  fi
+  if [[ -d "$SRC_ROOT/glossary" ]] && ! ls "$KANBAN_RUNS_DEST"/glossary*.md >/dev/null 2>&1; then
+    warn "glossary 配置先に glossary*.md がありません: $KANBAN_RUNS_DEST"
     fail=1
   fi
   # 6) skills のプレースホルダが残っていないか（置換漏れチェック）
