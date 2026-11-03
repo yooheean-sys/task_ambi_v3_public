@@ -25,7 +25,7 @@
 #  ③ 逆方向置換の準備（HARNESS_* → プレースホルダ値。欠落キーは一覧表示して失敗）
 #  ④ ファイル配置（内容＋ディレクトリ名の両方を置換）
 #     skills は skills.txt の登録分のみ。skills_ignore.txt 登録分は移行対象外。未登録の既存スキルは削除しない。
-#  ⑤ 25役生成（hermes profile create --clone-from default ＋ souls/ から SOUL 差し替え）
+#  ⑤ 26役生成（hermes profile create --clone-from default ＋ souls/ から SOUL 差し替え）
 #  ⑥ cron jobs.json 配置（既存は .orig 退避）＋ cron 有効化手順の表示
 #  ⑦ 導入確認（profile list・配置ファイルの存在確認）
 #
@@ -513,15 +513,15 @@ step4_install_files() {
 }
 
 # ---------------------------------------------------------------------------
-# ⑤25役生成（hermes profile create --clone-from default ＋ souls/ から SOUL 差し替え）
-# profiles.txt の各名（プレースホルダ入り）を置換した名前で25役を作る。
+# ⑤26役生成（hermes profile create --clone-from default ＋ souls/ から SOUL 差し替え）
+# profiles.txt の各名（プレースホルダ入り）を置換した名前で26役を作る。
 # ---------------------------------------------------------------------------
 step5_create_profiles() {
   local profiles_file="$SRC_ROOT/profiles.txt"
   if [[ ! -f "$profiles_file" ]]; then
     die "profiles.txt が見つかりません: $profiles_file"
   fi
-  info '=== step5: 25役生成 ==='
+  info '=== step5: 26役生成 ==='
   local raw_name new_name soul_src soul_dest idx=0
   while IFS= read -r raw_name || [[ -n "$raw_name" ]]; do
     raw_name="${raw_name#"${raw_name%%[![:space:]]*}"}"
@@ -591,7 +591,7 @@ step7_verify() {
   local fail=0
   if [[ "$DRY_RUN" == "yes" ]]; then
     info '[dry-run] 実行予定のチェック:'
-    info "[dry-run]  1. hermes profile list で25役が揃っているか"
+    info "[dry-run]  1. hermes profile list で26役が揃っているか"
     info "[dry-run]  2. 既存 config.yaml の MCP/hooks 反映と SOUL.md を確認する"
     info "[dry-run]  3. $DEST/skills / agent-hooks / cron/jobs.json が配置されているか"
     info "[dry-run]  4. criteria・glossary の配置先に criteria*.md / glossary*.md が配置されているか"
@@ -599,11 +599,12 @@ step7_verify() {
   fi
   # 1) profile 数（hermes profile list の行数は環境により異なるため、profiles/ の
   #    ディレクトリ数で確認する）
-  local n_profiles
+  local n_profiles n_expected
   n_profiles="$(ls -1 "$DEST/profiles" 2>/dev/null | wc -l || echo 0)"
-  info "profiles 配置数: $n_profiles（配布 profiles.txt は 25 役）"
-  if [[ "$n_profiles" -lt 25 ]]; then
-    warn 'profile が 25 未満です。step5 の hermes profile create の出力を確認してください。'
+  n_expected="$(grep -cv '^#\|^\s*$' "$SRC_ROOT/profiles.txt" 2>/dev/null || echo 0)"
+  info "profiles 配置数: $n_profiles（profiles.txt 期待値: $n_expected）"
+  if [[ "$n_profiles" -lt "$n_expected" ]]; then
+    warn "profile が $n_expected 未満です（実績: $n_profiles）。step5 の hermes profile create の出力を確認してください。"
     fail=1
   fi
   # 2) 主要ファイル

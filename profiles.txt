@@ -21,5 +21,6 @@ public_relation
 specification_writer
 structure_designer
 system_engineer
+mlops
 test_engineer
 vault
