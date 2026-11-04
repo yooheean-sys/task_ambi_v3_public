@@ -54,7 +54,7 @@ task_ambi 4層カンバン組織のハーネス（default プロファイル直�
 - 裁定済み: 公開リポジトリは ${REPO_NAME}_public（GitHub リポジトリ本体はユーザーが作成する）・h01 系 criteria も公開可（機密プロジェクトではない）・cron はそのまま配布。
 - task_ambi_public は v2 専用リポジトリ — v3 用に流用しない。
 - 役割名の一般化: project_lead の役割名・criteria ファイル名は `${PROJECT_<code>_NAME}` プレースホルダで一般化する（例: `project_lead_${PROJECT_G01_NAME}`・`criteria_project_lead_${PROJECT_G01_NAME}.md`）。`${ORG_NAME}` や実名の直書きに寄せない。
-- 例外（2026-10-31 人間裁定）: カテゴリ名 `taskambi` は公開でもリテラル保持。F4 の `taskambi → ${PROJECT_NAME}` は廃止し、REVERSE_MAP・installer・engine の対応定義からも削除済み（三者を同時に更新しないと自己テストが失敗する）。
+- 例外（2026-10-31 人間裁定）: カテゴリ名 `taskambi` は公開でもリテラル保持。F4 の `taskambi → PROJECT_NAME`（旧トークン名）という置換は廃止し、REVERSE_MAP・installer・engine の対応定義からも削除済み（三者を同時に更新しないと自己テストが失敗する）。
 - 公開生成スクリプトと置換表は正本の `scripts/` 配下に置き、生成物リポジトリとは分離する。導入スクリプトの正本は `harness/install_local.sh`、許可リストの共通検証処理は `harness/skill_manifest.py`。公開側だけの手編集で終わらせない。
 
 ## references

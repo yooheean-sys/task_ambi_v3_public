@@ -59,6 +59,25 @@ pbi
   正本側でリストを変更して再生成する。
 - 公開側のリストとディレクトリ名には同じ公開用置換が適用される。
 
+### longform スキル群
+
+長文執筆用の6スキルは `skills/longform/` にまとめ、次の相対パスを個別に登録する。
+`longform` カテゴリだけの一括指定や、旧配置 `longform-*` の二重登録はしない。
+
+```text
+longform/longform-integrate
+longform/longform-outline
+longform/longform-project-init
+longform/longform-revise
+longform/longform-section-draft
+longform/longform-writing-pipeline
+```
+
+各スキルの `SKILL.md` に加え、参照資料・雛形・引用とカバレッジの検査スクリプトも
+同梱する。導入先でも `skills/longform/` の構成を維持する。
+Quarto・textlint・just・Vale 等の外部ツールは同梱・自動インストールしない。
+必要なツールは導入先で別途準備する。
+
 ## 導入手順
 
 1. Hermes 本体を導入し、導入先 default の初期設定を済ませる。既存 `config.yaml` が

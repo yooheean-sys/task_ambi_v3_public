@@ -15,6 +15,12 @@ grilling
 hermes-browser-automation
 hermes-shell-hooks
 hermes-webhook-file-trigger
+longform/longform-integrate
+longform/longform-outline
+longform/longform-project-init
+longform/longform-revise
+longform/longform-section-draft
+longform/longform-writing-pipeline
 mkdocs-documentation
 software-development/spec-completeness-audit
 taskambi/taskambi_boot
