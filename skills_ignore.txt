@@ -95,8 +95,12 @@ discord-gateway-troubleshooting
 # pbi は create-pbi に代替された旧版
 pbi
 
-# 手作業で移行するスキル（2026-11-03 裁定・配布せず導入先で手動再取り込み）
+# 手作業で移行するスキル（配布せず導入先で手動再取り込み）
+# - deep-research: skills.sh / samber/cc-skills 由来・trust は community（Hermes公式ではない）。
+#   `hermes skills inspect skills-sh/samber/cc-skills/deep-research` で出典・内容を確認し、
+#   `hermes skills install skills-sh/samber/cc-skills/deep-research` で手動導入（2026-11-05追加）。
 # - glab: gitlab-org/cli 同梱の agent skills。`glab skills --path .hermes/skills` でインポート
 # - obsidian-cli: skills.sh カタログ（kepano/obsidian-skills）。`hermes skills install` で導入
+deep-research
 glab
 obsidian-cli
