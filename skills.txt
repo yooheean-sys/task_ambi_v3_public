@@ -10,7 +10,6 @@ autonomous-ai-agents/hermes-desktop-app
 autonomous-ai-agents/hermes-skill-curation
 autonomous-ai-agents/multi-project-agent-roles
 create-pbi
-grilling
 hermes-browser-automation
 hermes-shell-hooks
 hermes-webhook-file-trigger
@@ -35,7 +34,6 @@ taskambi/taskambi_sdd-project-lead
 taskambi/taskambi_sdd-setup
 taskambi/taskambi_sdd-worker-rules
 taskambi/taskambi_sync_project_lead
-tr
 vault/vault_custom_scripts
 vault/vault_note_authoring
 vault/vault_inbox_classification

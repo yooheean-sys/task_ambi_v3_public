@@ -100,7 +100,18 @@ pbi
 #   `hermes skills inspect skills-sh/samber/cc-skills/deep-research` で出典・内容を確認し、
 #   `hermes skills install skills-sh/samber/cc-skills/deep-research` で手動導入（2026-11-05追加）。
 # - glab: gitlab-org/cli 同梱の agent skills。`glab skills --path .hermes/skills` でインポート
+# - grilling: skills.sh / mattpocock/skills 由来・trust は community（Hermes公式ではない）。
+#   `hermes skills inspect skills-sh/mattpocock/skills/grilling` で出典・内容を確認し、
+#   `hermes skills install skills-sh/mattpocock/skills/grilling` で手動導入（2026-11-06追加）。
+#   最新版は現環境の版と内容が異なるため、同一動作が必要なら旧版との差分を確認する。
 # - obsidian-cli: skills.sh カタログ（kepano/obsidian-skills）。`hermes skills install` で導入
+# - tr: skills.sh / hiroro-work/claude-plugins の translate 由来・trust は community（Hermes公式ではない）。
+#   `hermes skills inspect skills-sh/hiroro-work/claude-plugins/tr` で出典・内容を確認し、
+#   `hermes skills install skills-sh/hiroro-work/claude-plugins/tr` で手動導入（2026-11-06追加）。
+#   Claude Code の Agent ツールと tr・tr-hq に依存する。スキル単体での Hermes 動作未検証。
+#   既存導入済みスキルは自動削除・上書きしない。
 deep-research
 glab
+grilling
 obsidian-cli
+tr
